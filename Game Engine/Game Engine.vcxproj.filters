@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="AnimatedSprite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_button.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_element.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_panel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_text.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="sprite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_slider.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_droplist.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gui_editbox.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gameObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="gameEngine.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="variables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="animation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="multithreadManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="threadHelper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="platform.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="lightObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="rigidbody.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="physics.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test class.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="projectile.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="falling_obj_scene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="light_scene.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AnimatedSprite.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="audio.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_button.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_element.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_panel.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_text.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="sprite.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="structures.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_slider.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_droplist.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_editbox.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="gameEngine.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="variables.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="animation.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="multithreadManager.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="threadHelper.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="barrier.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="lightObject.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidbody.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="physics.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="test class.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="projectile.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="falling_obj_scene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="light_scene.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{c165d185-a024-4bc4-a1be-1aaeb265c515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{15605ace-a4e3-4191-a1be-f090db336bb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{5783a7ec-9b07-49c6-9b56-1e1e7aaa5774}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
