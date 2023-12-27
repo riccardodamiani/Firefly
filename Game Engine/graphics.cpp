@@ -234,6 +234,13 @@ void Graphics::PollRequests(double tick_tock_motherfucker) {
 			delete data;
 			break;
 		}
+		case GraphicRequestType::CREATE_FONT_CHAR:		//create a letter of a font
+		{
+			fontCharCreation* data = (fontCharCreation*)request.second;
+			LoadFontChar_Internal(data);
+			delete data;
+			break;
+		}
 
 		case GraphicRequestType::CREATE_TEXTURE:	//Create a texture. Require sdl calls
 		{
@@ -1366,7 +1373,7 @@ void Graphics::CreateTextSurface(EntityName name, std::string text, TTF_Font* fo
 	SDL_SetTextureBlendMode(text_texture, SDL_BLENDMODE_BLEND);		//probably not needed
 	SDL_RenderCopy(_renderer, text_texture, NULL, NULL);
 	SDL_SetRenderTarget(_renderer, NULL);
-	
+
 	//clear everything
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(text_texture);
@@ -1432,6 +1439,33 @@ void Graphics::LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color ba
 	this->_requests.push_back(request);
 }
 
+void Graphics::LoadFontChar_Internal(fontCharCreation* fontCharData) {
+
+	//clear everything when done
+	if (fontCharData->deleteFontObj) {
+		TTF_CloseFont(fontCharData->fontInfo->font);
+		delete fontCharData->fontInfo;
+	}
+	
+	//create a single char texture
+	std::vector <TextLetterStruct>& vec = _fontsRef[fontCharData->fontInfo->atlasName];
+
+	std::string character = "";
+	character.append(1, (char)fontCharData->char_code);
+	vector2 size = {0, 0};
+	EntityName name = DecodeName(character.c_str()) * fontCharData->fontInfo->atlasName;
+	if (this->isCharPrint((char)fontCharData->char_code)) {
+
+		this->CreateTextSurface(name, character,
+			fontCharData->fontInfo->font,
+			fontCharData->fontInfo->color,
+			fontCharData->fontInfo->bgColor,
+			size);
+	}
+	
+	vec.push_back({ name, size });
+}
+
 void Graphics::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
 	char character[2] = "";
 	std::string fontCompleteName = "Fonts\\" + fontName + ".ttf";
@@ -1447,21 +1481,30 @@ void Graphics::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL
 	}
 
 	std::vector <TextLetterStruct>& vec = _fontsRef[atlasName];
+	fontAtlasInfo* fontInfo = new fontAtlasInfo();
+	fontInfo->atlasName = atlasName;
+	fontInfo->bgColor = backgroundColor;
+	fontInfo->color = color;
+	fontInfo->font = font;
 
+	//queue all letters in the request list
 	for (int i = 0; i < 256; i++) {
 		EntityName name = 0;
 		vector2 size = {0, 0};
-		if (this->isCharPrint((char)i)) {
-			std::string character = "";
-			character.append(1, (char)i);
-			//std::string textName = fontName + character;
-			name = DecodeName(character.c_str()) * atlasName;
-			this->CreateTextSurface(name, character, font, color, backgroundColor, size);
-		}
-		vec.push_back({name, size});
+		
+		fontCharCreation *fontCharInfo = new fontCharCreation();
+		fontCharInfo->fontInfo = fontInfo;
+		fontCharInfo->char_code = (char)i;
+		fontCharInfo->deleteFontObj = false;
+		std::pair < GraphicRequestType, void*> request(GraphicRequestType::CREATE_FONT_CHAR, fontCharInfo);
+		this->_requests.push_back(request);
 	}
 
-	
+	//delete the font object once finished loading
+	fontCharCreation* fontCharInfo = new fontCharCreation();
+	fontCharInfo->fontInfo = fontInfo;
+	fontCharInfo->deleteFontObj = true;
+
 }
 
 bool Graphics::isCharPrint(char c) {
