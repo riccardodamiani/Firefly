@@ -108,6 +108,7 @@ public:
 	
 	double GetRenderFPS();
 	double GetGameFPS();
+	void SetGameFPS(double gameFps);
 
 	//internal use
 	void _GuiListener(GUI_Element* element, GuiAction action);

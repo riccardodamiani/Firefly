@@ -518,6 +518,10 @@ double GameEngine::GetGameFPS() {
 	return gameCurrentFPS;
 }
 
+void GameEngine::SetGameFPS(double fps){
+	gameFPS = fps;
+}
+
 //all the calls to sdl libraries must be done from this thread
 void GameEngine::mainThread() {
 	double elapsedTime = 0;
