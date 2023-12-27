@@ -22,6 +22,7 @@ void ccw_rot_func(double time, TransformStruct& val, void* ptr) {
 
 void LightScene::onload() {
 
+	_GameEngine->SetGameFPS(300);
 	_GameEngine->AllocGlobalVariable_Double(DecodeName("timer"), 1.0);
 	_GameEngine->AllocGlobalVariable_Double(DecodeName("timer1"), 5.0);
 

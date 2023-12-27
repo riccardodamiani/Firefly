@@ -36,6 +36,8 @@ void circle_filter(CustomFilterData& data) {
 }
 
 void FallingObjScene::onload() {
+
+	_GameEngine->SetGameFPS(600);
 	_graphicsEngine->LoadTextureGroup("test group");
 
 	GameObject* cam = new Camera({ 32, 18 }, { 0, 0 }, 0);		//create a new camera in the scene
