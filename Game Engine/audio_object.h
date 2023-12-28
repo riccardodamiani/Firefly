@@ -17,6 +17,8 @@ enum AudioStatus {
 	AUDIO_STATUS_FINISHED	//finished: doesn't own the channel anymore
 };
 
+class AudioObj;
+
 class AudioObj : public std::enable_shared_from_this<AudioObj> {
 public:
 	AudioObj(std::string trackName, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
