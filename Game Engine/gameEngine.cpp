@@ -460,6 +460,7 @@ void GameEngine::LoadScene_Internal() {
 	}
 	
 	currentScene->onload();		//load next scene
+	currentScene->InitLoadingStateCalc();
 
 	_freeingScene = false;
 	_sceneReady = true;
