@@ -47,6 +47,7 @@ void Game::Init() {
 	_graphicsEngine->LoadFontAtlas(DecodeName("whiteFont"), { 240, 240, 240, 255 }, { 0, 0, 0, 0 }, "TrulyMadlyDpad-Regular", 72);
 	_graphicsEngine->LoadFontAtlas(DecodeName("whiteFont-hint"), { 150, 150, 150, 255 }, { 0, 0, 0, 0 }, "TrulyMadlyDpad-Regular", 72);
 	SDL_Color bk = {50, 50, 50, 100};
+	_graphicsEngine->LoadTextureGroup("default");
 	_graphicsEngine->SetBackgroundColor(bk);
 	_GameEngine->CreateScene(new FallingObjScene(0));
 	_GameEngine->CreateScene(new LightScene(1));

@@ -16,6 +16,7 @@ public:
 	void gui_listener(GUI_Element* element, GuiAction action);
 	std::shared_ptr <AudioObj> _audioTest;
 	bool load_sound;
+	bool loading_scene;
 };
 
 #endif

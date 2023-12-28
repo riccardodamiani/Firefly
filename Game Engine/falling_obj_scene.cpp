@@ -6,8 +6,10 @@
 #include "gui_text.h"
 #include "gui_button.h"
 #include "gui_slider.h"
+#include "gui_panel.h"
 #include "test class.h"
 #include "projectile.h"
+#include "AnimatedSprite.h"
 #include "audio.h"
 
 #include <memory>
@@ -39,10 +41,16 @@ void circle_filter(CustomFilterData& data) {
 
 void FallingObjScene::onload() {
 
-	_GameEngine->SetGameFPS(600);
-	_graphicsEngine->LoadTextureGroup("test group");
+	//_graphicsEngine->LoadTextureGroup("test group");
+
+	auto bg_panel = new GUI_Panel(DecodeName("loading_panel"), 8, DecodeName("loading_bg"), { 0, 0 }, { 32, 18 }, 4);
+	auto slideAnim = new AnimatedSprite("slider", 1.0, 155, false, false, 5);
+	GUI_Slider* slide = new GUI_Slider(DecodeName("loading_slider"), 9, slideAnim, { -0.4, 0.5 }, { 4, 0.4 }, 0, 100.0, 0.1, 0.9, 5);
+	slide->SetActive(false);
 
 	GameObject* cam = new Camera({ 32, 18 }, { 0, 0 }, 0);		//create a new camera in the scene
+
+	_GameEngine->SetGameFPS(600);
 
 	GameObject* renderFps = new GUI_Text(DecodeName("render fps text"), 1, DecodeName("redFont"), { -6.8, 4 }, { 2.0, 0.3 }, 2);
 	renderFps->SetConstraintParent(cam, true, true, true);
@@ -53,7 +61,8 @@ void FallingObjScene::onload() {
 	GameObject* bodiesCount = new GUI_Text(DecodeName("bodies count text"), 4, DecodeName("redFont"), { -6.8, 3.4 }, { 2.0, 0.3 }, 2);
 	bodiesCount->SetConstraintParent(cam, true, true, true);
 
-	_GameEngine->AllocGlobalVariable_Double(DecodeName("timer"), 1.0);
+	_GameEngine->AllocGlobalVariable_Double(DecodeName("timer"), 0.0);
+	_GameEngine->AllocGlobalVariable_Double(DecodeName("loading_timer"), 0.5);
 
 	SDL_Color c1 = { 150, 50, 50, 150 };
 	SDL_Color c2 = { 200, 200, 200, 150 };
@@ -82,6 +91,7 @@ void FallingObjScene::onload() {
 	_PhysicsEngine->SetGravity({ 0, -9.81 });
 	_PhysicsEngine->SetSleepVelocity(0.05);
 	load_sound = false;
+	loading_scene = true;
 }
 
 void FallingObjScene::onfree() {
@@ -95,6 +105,29 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 		//here you can add code that need to be excecuted when the user close the window
 		_GameEngine->Quit();
 	}
+
+	//display loading screen
+	if (loading_scene) {
+		float scene_loading = GetLoadingState();
+		if (scene_loading < 100) {
+			((GUI_Slider*)_GameEngine->FindGameObject(DecodeName("loading_slider")))->SetValue(scene_loading);
+		}
+		else {
+			Double* timer = (Double*)_GameEngine->GetGlobalVariable(DecodeName("loading_timer"));
+			if (*timer > 0) {
+				*timer -= timeElapsed;
+			}
+			else {
+				loading_scene = false;
+				_GameEngine->FindGameObject(DecodeName("loading_slider"))->Destroy();
+				_GameEngine->FindGameObject(DecodeName("loading_panel"))->Destroy();
+			}
+		}
+	}
+	else {
+		
+	}
+	
 
 	GameObject* camera = _GameEngine->FindGameObject(DecodeName("MainCamera"));
 	if (camera) {
