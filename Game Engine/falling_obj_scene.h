@@ -3,6 +3,9 @@
 
 #include "scene.h"
 #include "gameEngine.h"
+#include "audio_object.h"
+
+#include <memory>
 
 class FallingObjScene : public Scene {
 public:
@@ -11,6 +14,7 @@ public:
 	void onfree();
 	void scene_callback(GameEvent event, double timeElapsed);
 	void gui_listener(GUI_Element* element, GuiAction action);
+	std::shared_ptr <AudioObj> _audioTest;
 };
 
 #endif

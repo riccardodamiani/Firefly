@@ -10,6 +10,8 @@
 #include "projectile.h"
 #include "audio.h"
 
+#include <memory>
+
 
 FallingObjScene::FallingObjScene(unsigned int id) : Scene(id) {
 
@@ -58,8 +60,10 @@ void FallingObjScene::onload() {
 	_graphicsEngine->CreateCustomTexture(500, 300, texture_filter, DecodeName("button texture"), nullptr);
 	_graphicsEngine->CreateRectangleTexture(c2, 500, 300, true, DecodeName("button texture 1"));
 
-	GameObject* button = new GUI_Button(DecodeName("button"), DecodeName("button texture"), 3, { 0, -3 }, { 2, 0.5 }, 2);
+	GameObject* button = new GUI_Button(DecodeName("button"), DecodeName("button texture"), 3, { -1, -3 }, { 2, 0.5 }, 2);
 	button->SetConstraintParent(cam, true, true, true, true, true);
+
+	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1, -3 }, { 2, 0.5 }, 2);
 
 	_graphicsEngine->CreateRectangleTexture(c1, 500, 300, true, DecodeName("poly collided"));
 	_graphicsEngine->CreateRectangleTexture(c2, 500, 300, true, DecodeName("poly not collided"));
@@ -77,10 +81,15 @@ void FallingObjScene::onload() {
 
 	_PhysicsEngine->SetGravity({ 0, -9.81 });
 	_PhysicsEngine->SetSleepVelocity(0.05);
+
+	_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender"));
+	_audioTest->Play();
 }
 
 void FallingObjScene::onfree() {
 	_GameEngine->DestroyGlobalVariable(DecodeName("timer"));
+	_audioTest->Stop();
+	_audioTest = nullptr;
 }
 
 void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
@@ -146,14 +155,34 @@ void FallingObjScene::gui_listener(GUI_Element* element, GuiAction action) {
 	{
 		if (action == GuiAction::MOUSE_MOVED_OVER) {
 			((GameObject*)element)->setTexture(DecodeName("button texture 1"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), true, 30, element->transform.position);
+			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
 		}
 		else if (action == GuiAction::MOUSE_MOVED_OUT) {
 			((GameObject*)element)->setTexture(DecodeName("button texture"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), true, 30, element->transform.position);
+			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
 		}
 		else if (action == GuiAction::LEFT_BUTTON_UP) {
 			_GameEngine->LoadScene(1);
+		}
+		break;
+	}
+	case 5:	//audio test button
+	{
+		if (action == GuiAction::MOUSE_MOVED_OVER) {
+			((GameObject*)element)->setTexture(DecodeName("button texture 1"));
+			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+		}
+		else if (action == GuiAction::MOUSE_MOVED_OUT) {
+			((GameObject*)element)->setTexture(DecodeName("button texture"));
+			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+		}
+		else if (action == GuiAction::LEFT_BUTTON_UP) {
+			if (_audioTest->GetStatus() == AUDIO_STATUS_PLAYING) {
+				_audioTest->Pause();
+			}
+			else if (_audioTest->GetStatus() == AUDIO_STATUS_PAUSE) {
+				_audioTest->Resume();
+			}
 		}
 		break;
 	}
