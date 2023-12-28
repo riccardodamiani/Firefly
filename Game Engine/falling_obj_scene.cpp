@@ -96,6 +96,7 @@ void FallingObjScene::onload() {
 
 void FallingObjScene::onfree() {
 	_GameEngine->DestroyGlobalVariable(DecodeName("timer"));
+	_GameEngine->DestroyGlobalVariable(DecodeName("loading_timer"));
 	_audioTest->Stop();
 	_audioTest = nullptr;
 }
