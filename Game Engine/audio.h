@@ -53,6 +53,8 @@ public:
 	Audio(int effectChannels, int dialogsChannels, int uiChannels);
 	~Audio();
 	
+	unsigned long GetTaskQueueLen();
+
 	void PollRequests();
 
 	double GetDialogLen(EntityName dialog);

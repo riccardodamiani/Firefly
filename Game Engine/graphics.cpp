@@ -185,6 +185,11 @@ Graphics::~Graphics() {
 	SDL_DestroyWindow(this->_window);
 }
 
+//this function could return slight a wrong queue size
+unsigned long Graphics::GetTaskQueueLen() {
+	return _requests.size();
+}
+
 
 //handles the requests regarding graphics for a maximum amount of time
 //after which the mainThread needs to start the next frame. Runs on the main thread

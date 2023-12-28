@@ -181,6 +181,8 @@ public:
 	void Calculate_Parabola_Coeff_From_Points(double x1, double y1, double x2, double y2, double x3, double y3, double &A, double &B, double &C);
 
 	void PollRequests(double timeLeft);		//poll requests from the request queue
+
+	unsigned long GetTaskQueueLen();
 private:
 	//internal methods for handling specific requests that need SDL calls
 	void SetWindowTitle_Internal(std::string title);

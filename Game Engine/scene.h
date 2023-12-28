@@ -13,9 +13,12 @@ public:
 	virtual void onload();
 	virtual void onfree();
 	unsigned int getID();
-
+	float GetLoadingState();
+	void InitLoadingStateCalc();
 private:
 	unsigned int _id;
+	float _loadingPerc;
+	long _startingTasks;
 };
 
 #endif

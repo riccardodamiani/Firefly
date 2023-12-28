@@ -59,6 +59,15 @@ Audio::Audio(int effectChannels, int dialogsChannels, int uiChannels) {
 	this->loadSoundFileInFolder("Sound");		//load sound files
 }
 
+Audio::~Audio() {
+	Mix_CloseAudio();
+	Mix_Quit();
+}
+
+unsigned long Audio::GetTaskQueueLen() {
+	return _requests.size();
+}
+
 void Audio::loadSoundFileInFolder(std::string directory) {
 
 	try {
@@ -135,11 +144,6 @@ void Audio::loadSoundFileInFolder(std::string directory) {
 		
 	}
 	
-}
-
-Audio::~Audio() {
-	Mix_CloseAudio();
-	Mix_Quit();
 }
 
 void Audio::PollRequests() {

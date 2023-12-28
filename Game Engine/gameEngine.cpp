@@ -518,6 +518,10 @@ double GameEngine::GetGameFPS() {
 	return gameCurrentFPS;
 }
 
+unsigned long GameEngine::GetTaskQueueLen() {
+	return _requests.size();
+}
+
 void GameEngine::SetGameFPS(double fps){
 	gameFPS = fps;
 }

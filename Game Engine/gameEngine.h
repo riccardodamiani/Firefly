@@ -109,6 +109,7 @@ public:
 	double GetRenderFPS();
 	double GetGameFPS();
 	void SetGameFPS(double gameFps);
+	unsigned long GetTaskQueueLen();
 
 	//internal use
 	void _GuiListener(GUI_Element* element, GuiAction action);
