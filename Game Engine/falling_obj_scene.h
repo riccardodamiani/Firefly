@@ -15,6 +15,7 @@ public:
 	void scene_callback(GameEvent event, double timeElapsed);
 	void gui_listener(GUI_Element* element, GuiAction action);
 	std::shared_ptr <AudioObj> _audioTest;
+	bool load_sound;
 };
 
 #endif

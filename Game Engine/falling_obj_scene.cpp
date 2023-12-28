@@ -81,9 +81,7 @@ void FallingObjScene::onload() {
 
 	_PhysicsEngine->SetGravity({ 0, -9.81 });
 	_PhysicsEngine->SetSleepVelocity(0.05);
-
-	_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender"));
-	_audioTest->Play();
+	load_sound = false;
 }
 
 void FallingObjScene::onfree() {
@@ -100,6 +98,11 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 
 	GameObject* camera = _GameEngine->FindGameObject(DecodeName("MainCamera"));
 	if (camera) {
+		if (!load_sound) {
+			load_sound = true;
+			_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender", true, 100, { -20, 10 }));
+			_audioTest->Play();
+		}
 		if (_InputEngine->didMouseWheelMove()) {
 			int wY = _InputEngine->getLastWheelMoviment().second;
 			if (wY > 0) {
