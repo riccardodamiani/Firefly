@@ -6,6 +6,8 @@
 #include <mutex>
 #include <atomic>
 #include "gameEngine.h"
+#include <memory>
+#include "audio_object.h"
 
 class Audio {
 	enum class AudioRequest {
@@ -24,6 +26,9 @@ class Audio {
 		RESUME_DIALOGS,
 		RESUME_SOUND_EFFECTS,
 		RESUME_UI_EFFECTS,
+		PAUSE_AUDIO_OBJECT,
+		RESUME_AUDIO_OBJECT,
+		STOP_AUDIO_OBJECT,
 		RESUME_MUSIC,
 		STOP_MUSIC,
 	};
@@ -41,6 +46,7 @@ class Audio {
 		int angle;
 		int distance;
 		int volume;
+		std::shared_ptr <AudioObj> audio_obj;
 	}AudioRequestData;
 public:
 	//Audio();
@@ -53,9 +59,10 @@ public:
 	double GetSoundEffectLen(EntityName effect);
 	double GetUIEffectLen(EntityName effect);
 
-	void PlaySoundEffect(EntityName sound, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = {0, 0});
-	void PlayDialog(EntityName dialog, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
-	void PlayUIEffect(EntityName sound, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
+	void PlaySoundEffect(EntityName sound, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = {0, 0});
+	void PlayDialog(EntityName dialog, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
+	void PlayUIEffect(EntityName sound, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
+	bool AudioPlaying(int channel, unsigned long trackId);
 
 	void PlayMusic(EntityName music);
 	bool IsPlayingMusic();
@@ -81,6 +88,9 @@ public:
 	void ResumeDialogs();
 	void PauseUIEffects();
 	void ResumeUIEffects();
+	void PauseAudioObject(std::shared_ptr <AudioObj> audio_obj);
+	void ResumeAudioObject(std::shared_ptr <AudioObj> audio_obj);
+	void StopAudioObject(std::shared_ptr <AudioObj> audio_obj);
 
 	void PauseMusic();
 	void ResumeMusic();
@@ -90,9 +100,9 @@ private:
 	unsigned long int getChunkTimeMilliseconds(Mix_Chunk* chunk);
 	void loadSoundFileInFolder(std::string directory);
 
-	void PlaySoundEffect_Internal(EntityName sound, int left, int right );
-	void PlayDialog_Internal(EntityName dialog, int left, int right);
-	void PlayUIEffect_Internal(EntityName sound, int left, int right);
+	void PlaySoundEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj);
+	void PlayDialog_Internal(EntityName dialog, int left, int right, std::shared_ptr <AudioObj> audio_obj);
+	void PlayUIEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj);
 
 	void PlayMusic_Internal(EntityName music);
 
@@ -107,6 +117,9 @@ private:
 	void ResumeDialogs_Internal();
 	void PauseUIEffects_Internal();
 	void ResumeUIEffects_Internal();
+	void PauseAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
+	void ResumeAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
+	void StopAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
 
 	void PauseMusic_Internal();
 	void ResumeMusic_Internal();
@@ -137,6 +150,7 @@ private:
 	bool playing_music;
 
 	std::vector <AudioRequestData> _requests;
+	std::shared_ptr <AudioObj>* _audioObjTracks;
 
 	std::mutex update_mutex;
 	std::mutex request_mutex;

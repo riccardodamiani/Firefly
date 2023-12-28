@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <memory>
 
 namespace fs = std::filesystem;
 
@@ -27,6 +28,7 @@ Audio::Audio(int effectChannels, int dialogsChannels, int uiChannels) {
 	this->_dialogChannels = dialogsChannels;
 	this->_uiSoundChannels = uiChannels;
 	this->_effectsChannel = effectChannels;
+	_audioObjTracks = new std::shared_ptr <AudioObj>[_channelsToAllocate];	//keeps track of which audio objects is in control of a audio channel
 
 	Mix_Init(MIX_INIT_MP3);
 
@@ -151,14 +153,14 @@ void Audio::PollRequests() {
 
 		switch (data.type) {
 		case AudioRequest::PLAY_SOUND_EFFECT:
-			PlaySoundEffect_Internal(data.name, data.left, data.right);
+			PlaySoundEffect_Internal(data.name, data.left, data.right, data.audio_obj);
 			break;
 		case AudioRequest::PLAY_UI_EFFECT:
-			PlayUIEffect_Internal(data.name, data.left, data.right);
+			PlayUIEffect_Internal(data.name, data.left, data.right, data.audio_obj);
 			break;
 
 		case AudioRequest::PLAY_DIALOG:
-			PlayDialog_Internal(data.name, data.left, data.right);
+			PlayDialog_Internal(data.name, data.left, data.right, data.audio_obj);
 			break;
 
 		case AudioRequest::PLAY_SOUNDTRACK:
@@ -206,6 +208,18 @@ void Audio::PollRequests() {
 
 		case AudioRequest::RESUME_UI_EFFECTS:
 			ResumeUIEffects_Internal();
+			break;
+
+		case AudioRequest::PAUSE_AUDIO_OBJECT:
+			PauseAudioObject_Internal(data.audio_obj);	//i didn't want to create a new variable
+			break;
+
+		case AudioRequest::STOP_AUDIO_OBJECT:
+			StopAudioObject_Internal(data.audio_obj);	//i didn't want to create a new variable
+			break;
+
+		case AudioRequest::RESUME_AUDIO_OBJECT:
+			ResumeAudioObject_Internal(data.audio_obj);	//i didn't want to create a new variable
 			break;
 
 		case AudioRequest::RESUME_MUSIC:
@@ -271,7 +285,7 @@ unsigned long int Audio::getChunkTimeMilliseconds(Mix_Chunk *chunk){
 }
 
 
-void Audio::PlaySoundEffect(EntityName sound, bool spatial_sound, double maxDistance, vector2 source_position) {
+void Audio::PlaySoundEffect(EntityName sound, std::shared_ptr<AudioObj> audio_obj, bool spatial_sound, double maxDistance, vector2 source_position) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	if (!this->_playSoundEffects)
@@ -300,11 +314,12 @@ void Audio::PlaySoundEffect(EntityName sound, bool spatial_sound, double maxDist
 	data.left = left;
 	data.right = right;
 	data.type = AudioRequest::PLAY_SOUND_EFFECT;
+	data.audio_obj = audio_obj;
 	_requests.push_back(data);
 }
 
 
-void Audio::PlayDialog(EntityName dialog, bool spatial_sound, double maxDistance, vector2 source_position) {
+void Audio::PlayDialog(EntityName dialog, std::shared_ptr<AudioObj> audio_obj, bool spatial_sound, double maxDistance, vector2 source_position) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	if (!this->_playDialog)
@@ -333,10 +348,11 @@ void Audio::PlayDialog(EntityName dialog, bool spatial_sound, double maxDistance
 	data.left = left;
 	data.right = right;
 	data.type = AudioRequest::PLAY_DIALOG;
+	data.audio_obj = audio_obj;
 	_requests.push_back(data);
 }
 
-void Audio::PlayUIEffect(EntityName sound, bool spatial_sound, double maxDistance, vector2 source_position) {
+void Audio::PlayUIEffect(EntityName sound, std::shared_ptr<AudioObj> audio_obj, bool spatial_sound, double maxDistance, vector2 source_position) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	if (!this->_playUISounds)
@@ -365,7 +381,22 @@ void Audio::PlayUIEffect(EntityName sound, bool spatial_sound, double maxDistanc
 	data.left = left;
 	data.right = right;
 	data.type = AudioRequest::PLAY_UI_EFFECT;
+	data.audio_obj = audio_obj;
 	_requests.push_back(data);
+}
+
+bool Audio::AudioPlaying(int channel, unsigned long trackId) {
+	if (channel < 0 || channel > _channelsToAllocate)
+		return false;
+
+	if (_audioObjTracks[channel].get() == nullptr)
+		return false;
+	
+	if (_audioObjTracks[channel]->getTrackId() == trackId && Mix_Playing(channel)) {
+		return true;
+	}
+
+	return false;
 }
 
 void Audio::PlayMusic(EntityName music) {
@@ -505,6 +536,33 @@ void Audio::ResumeUIEffects() {
 	_requests.push_back(data);
 }
 
+void Audio::PauseAudioObject(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(request_mutex);
+
+	AudioRequestData data;
+	data.type = AudioRequest::PAUSE_AUDIO_OBJECT;
+	data.audio_obj = audio_obj;
+	_requests.push_back(data);
+}
+
+void Audio::ResumeAudioObject(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(request_mutex);
+
+	AudioRequestData data;
+	data.type = AudioRequest::RESUME_AUDIO_OBJECT;
+	data.audio_obj = audio_obj;
+	_requests.push_back(data);
+}
+
+void Audio::StopAudioObject(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(request_mutex);
+
+	AudioRequestData data;
+	data.type = AudioRequest::STOP_AUDIO_OBJECT;
+	data.audio_obj = audio_obj;
+	_requests.push_back(data);
+}
+
 void Audio::PauseMusic() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
@@ -536,7 +594,7 @@ void Audio::StopAll() {
 	
 }
 
-void Audio::PlaySoundEffect_Internal(EntityName sound, int left, int right) {
+void Audio::PlaySoundEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
 	if (!this->_playSoundEffects)
@@ -547,11 +605,14 @@ void Audio::PlaySoundEffect_Internal(EntityName sound, int left, int right) {
 	if (availCh != -1 && this->_soundEffects.find(sound) != _soundEffects.end()) {
 		Mix_SetPanning(availCh, left, right);
 		Mix_PlayChannel(availCh, this->_soundEffects[sound].sound, 0);
+		_audioObjTracks[availCh] = audio_obj;
+		if (audio_obj != nullptr)
+			audio_obj->__setChannel(availCh);
 	}
 	return;
 }
 
-void Audio::PlayDialog_Internal(EntityName dialog, int left, int right) {
+void Audio::PlayDialog_Internal(EntityName dialog, int left, int right, std::shared_ptr <AudioObj> audio_obj) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
 	if (!this->_playDialog)
@@ -562,12 +623,15 @@ void Audio::PlayDialog_Internal(EntityName dialog, int left, int right) {
 	if (availCh != -1 && this->_dialogs.find(dialog) != _dialogs.end()) {
 		Mix_SetPanning(availCh, left, right);
 		Mix_PlayChannel(availCh, this->_dialogs[dialog].sound, 0);
+		_audioObjTracks[availCh] = audio_obj;
+		if (audio_obj != nullptr)
+			audio_obj->__setChannel(availCh);
 	}
 	return;
 }
 
 
-void Audio::PlayUIEffect_Internal(EntityName sound, int left, int right) {
+void Audio::PlayUIEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
 	if (!this->_playUISounds)
@@ -579,6 +643,9 @@ void Audio::PlayUIEffect_Internal(EntityName sound, int left, int right) {
 		//Mix_SetPosition(availCh, angle, distance);
 		Mix_SetPanning(availCh, left, right);
 		Mix_PlayChannel(availCh, this->_uiSoundEffects[sound].sound, 0);
+		_audioObjTracks[availCh] = audio_obj;
+		if(audio_obj != nullptr)
+			audio_obj->__setChannel(availCh);
 		return;
 	}
 	return;
@@ -665,6 +732,58 @@ void Audio::ResumeUIEffects_Internal() {
 		Mix_Resume(i);
 	}
 }
+
+void Audio::PauseAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(update_mutex);
+
+	if (audio_obj.get() == nullptr)	//valid audio object
+		return;
+
+	int ch = audio_obj->getAudioChannel();
+	if (ch < 0 || ch > _channelsToAllocate)	//valid channel
+		return;
+
+	if (_audioObjTracks[ch] != nullptr && _audioObjTracks[ch]->getTrackId() == audio_obj->getTrackId()) {	//same audio object playing
+		Mix_Pause(ch);
+		audio_obj->__setStatus(AudioStatus::AUDIO_STATUS_PAUSE);
+	}
+}
+
+void Audio::ResumeAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(update_mutex);
+
+	if (audio_obj.get() == nullptr)	//valid audio object
+		return;
+
+	int ch = audio_obj->getAudioChannel();
+	if (ch < 0 || ch > _channelsToAllocate)	//valid channel
+		return;
+
+	if (_audioObjTracks[ch] != nullptr && _audioObjTracks[ch]->getTrackId() == audio_obj->getTrackId()) {	//same audio object playing
+		if (Mix_Playing(ch) && Mix_Paused(ch)) {	//channel still playing but paused
+			Mix_Resume(ch);
+			audio_obj->__setStatus(AudioStatus::AUDIO_STATUS_PLAYING);
+		}
+	}
+}
+
+void Audio::StopAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj) {
+	std::lock_guard <std::mutex> guard(update_mutex);
+
+	if (audio_obj.get() == nullptr)	//valid audio object
+		return;
+
+	int ch = audio_obj->getAudioChannel();
+	if (ch < 0 || ch > _channelsToAllocate)	//valid channel
+		return;
+
+	if (_audioObjTracks[ch] != nullptr && _audioObjTracks[ch]->getTrackId() == audio_obj->getTrackId()) {	//same audio object playing
+		Mix_HaltChannel(ch);
+		audio_obj->__setStatus(AudioStatus::AUDIO_STATUS_STOPPED);
+		_audioObjTracks[ch] = nullptr;	//channel no longer owned by the audio object
+	}
+}
+
 
 
 void Audio::PauseMusic_Internal() {
