@@ -10,117 +10,141 @@ Variable::Variable() {
 
 //boolean
 Bool::Bool() {
-	this->value = false;
+	value = std::make_shared<std::atomic<bool>>(false);
 }
 
 Bool::Bool(bool val) {
-	this->value = val;
+	value = std::make_shared<std::atomic<bool>>(val);
+}
+
+Bool::Bool(const Bool& val) {
+	value = val.get_ptr();
 }
 
 bool Bool::get() {
-	return this->value;
+	return *value;
 }
 
 void Bool::set(bool val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }
 
 //signed int
 Int::Int() {
-	this->value = 0;
+	value = std::make_shared<std::atomic<long>>(0);
 }
 
 Int::Int(long val) {
-	this->value = val;
+	value = std::make_shared<std::atomic<long>>(val);
+}
+
+Int::Int(const Int& val) {
+	value = val.get_ptr();
 }
 
 long Int::get() {
-	return this->value;
+	return *value;
 }
 
 void Int::set(long val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }
 
 //unsigned int
 UInt::UInt() {
-	this->value = 0;
+	value = std::make_shared<std::atomic<unsigned long>>(0);
 }
 
 UInt::UInt(unsigned long val) {
-	this->value = val;
+	value = std::make_shared<std::atomic<unsigned long>>(val);
+}
+
+UInt::UInt(const UInt& val) {
+	value = val.get_ptr();
 }
 
 unsigned long UInt::get() {
-	return this->value;
+	return *value;
 }
 
 void UInt::set(unsigned long val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }
 
 //pointer
 Void_Ptr::Void_Ptr() {
-	this->value = nullptr;
+	value = std::make_shared<std::atomic<void*>>(nullptr);
 }
 
 Void_Ptr::Void_Ptr(void *ptr) {
-	this->value = ptr;
+	value = std::make_shared<std::atomic<void*>>(ptr);
+}
+
+Void_Ptr::Void_Ptr(const Void_Ptr& val) {
+	value = val.get_ptr();
 }
 
 void* Void_Ptr::get() {
-	return this->value;
+	return *value;
 }
 
 void Void_Ptr::set(void* val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }
 
 //double
 Double::Double() {
-	this->value = 0;
+	value = std::make_shared<std::atomic<double>> (0.0);
 }
 
 Double::Double(double val) {
-	this->value = val;
+	value = std::make_shared<std::atomic<double>>(val);
+}
+
+Double::Double(const Double& val) {
+	value = val.get_ptr();
 }
 
 double Double::get() {
-	return this->value;
+	return *value;
 }
 
 void Double::set(double val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }
 
 
 //Vector2
 Vector2::Vector2() {
-	this->value = {0, 0};
+	value = std::make_shared<std::atomic<vector2>>(vector2{0, 0});
 }
 
 Vector2::Vector2(vector2 val) {
-	this->value = val;
+	value = std::make_shared<std::atomic<vector2>>(val);
+}
+
+Vector2::Vector2(const Vector2& val) {
+	value = val.get_ptr();
 }
 
 double Vector2::x() {
-	return value.load().x;
+	return (*value).load().x;
 }
 
 double Vector2::y() {
-	return value.load().y;
+	return (*value).load().y;
 }
 
 vector2 Vector2::get() {
-	return this->value;
+	return *value;
 }
 
 void Vector2::set(vector2 val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	this->value = val;
+	*value = val;
 }

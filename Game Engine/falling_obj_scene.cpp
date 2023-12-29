@@ -81,7 +81,6 @@ void FallingObjScene::onload() {
 	_graphicsEngine->CreateCircleTexture(c2, 200, true, DecodeName("sphere"));
 	_graphicsEngine->CreateCircleTexture(c1, 200, true, DecodeName("red sphere"));
 
-
 	for (int j = 0; j < 4; j++) {
 		for (int i = 0; i < 6; i++) {
 			new Test(DecodeName(""), false, { (double)(-8.0 + i * 3.4 + (j % 2) * 1.6), (double)(3 - j) * 1.8 });
@@ -124,9 +123,6 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 				_GameEngine->FindGameObject(DecodeName("loading_panel"))->Destroy();
 			}
 		}
-	}
-	else {
-		
 	}
 	
 
