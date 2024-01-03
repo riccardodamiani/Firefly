@@ -67,6 +67,7 @@ class Graphics {
 		RESIZE_WINDOW,
 		SET_LIGHTING_QUALITY,
 		CREATE_LIGHT_TEXTURE,
+		KILL_LIGHT_BAKING,
 		CREATE_TEXTURE,
 		CREATE_FONT_ATLAS,
 		CREATE_FONT_CHAR,
@@ -74,6 +75,13 @@ class Graphics {
 		DESTROY_TEXTURE,
 		FREE_TEXTURE_GROUP,
 		FREE_ALL
+	};
+
+	struct LightTextureBakeData {
+		LightObjectData lightObject;
+		SDL_Surface* surface;
+		std::atomic <bool> done;
+		std::atomic <bool> abort;
 	};
 
 	typedef struct textureCreation {
@@ -182,6 +190,8 @@ public:
 
 	void PollRequests(double timeLeft);		//poll requests from the request queue
 
+	void CompleteLightBaking();
+
 	unsigned long GetTaskQueueLen();
 private:
 	//internal methods for handling specific requests that need SDL calls
@@ -197,7 +207,12 @@ private:
 	void UnloadTextureGroup_Internal(EntityName groupName);
 	void DestroyTexture_Internal(EntityName name);
 	void UnloadAllGraphics_Internal();
+
+	//light baking
 	void BakeLightTexture_Internal(LightObjectData& lightData);
+	void CompleteBakingLightTexture_Internal(LightTextureBakeData* lightData);
+	void KillLightBaking();
+	void KillLightBaking_Internal();
 
 	static void PointLightFilter(CustomFilterData &data);
 	void SetLightingQuality_Internal(LightingQuality quality);
@@ -217,6 +232,7 @@ private:
 	void DrawRectangleInSurface(SDL_Surface* surface, SDL_Color* color, int width, int height, bool fill);
 	void DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int radius, bool fill);
 	void DrawCustomSurface(SDL_Surface* surface, int width, int height, void (*filter)(CustomFilterData& data), void* args);
+	void DrawLightSurface(LightTextureBakeData*, int width, int height, void (*filter)(CustomFilterData& data));
 
 	void drawLine(int x1, int y1, int x2, int y2, int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A);		//draw a line between point 1 and 2
 	void setRendererScale(double xScale, double yScale);
@@ -265,6 +281,9 @@ private:
 	std::atomic <vector2> spaceToScreenScale;
 	std::atomic <vector2> _cameraPos;
 
+	//vector for parallel light baking
+	std::vector<LightTextureBakeData *> _lightBakingTasks;
+	
 	//mutexes
 	std::mutex font_mutex;
 	std::mutex update_queue_mutex;

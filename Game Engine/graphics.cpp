@@ -112,7 +112,7 @@ void Graphics::SetMaxLightingLayer(unsigned int layer) {
 
 //calculate a parabola equation coefficient from three points.
 //This parabola is used to aproximate light decay due to distance instead of the inverse square law since
-//the last one goes to 0 at infinity which is bad calculation
+//the last one goes to 0 at infinity which is bad for calculation
 void Graphics::Calculate_Parabola_Coeff_From_Points(double x1, double y1, double x2, double y2, double x3, double y3, double& A, double& B, double& C) {
 	double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
 	A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
@@ -230,6 +230,11 @@ void Graphics::PollRequests(double tick_tock_motherfucker) {
 			LightObjectData* data = (LightObjectData*)request.second;
 			BakeLightTexture_Internal(*data);
 			delete data;
+			break;
+		}
+		case GraphicRequestType::KILL_LIGHT_BAKING:
+		{
+			KillLightBaking_Internal();
 			break;
 		}
 		case GraphicRequestType::CREATE_FONT_ATLAS:		//create a font. Require sdl calls
@@ -460,7 +465,6 @@ void Graphics::CreateCustomTexture_Internal(int width, int height, void (*filter
 }
 
 
-
 //draw a custom texture with a pattern defined by the function filter
 //filter is a function witch receive 3 parameters: x and y of the pixel and a pointer to a already created color structure. 
 //x and y are calculated from the center of the texture
@@ -490,6 +494,44 @@ void Graphics::DrawCustomSurface(SDL_Surface* surface, int width, int height, vo
 
 	SDL_UnlockSurface(surface);
 }
+
+
+//draw a light surface
+//this function is run in parallel in a different thread that the main one
+void Graphics::DrawLightSurface(LightTextureBakeData *lightBakeData, int width, int height, 
+	void (*filter)(CustomFilterData& data)) {
+	if (filter == nullptr || lightBakeData->surface == nullptr) {
+		lightBakeData->done = true;
+		return;
+	}
+		
+	memset(lightBakeData->surface->pixels, 0, lightBakeData->surface->pitch * lightBakeData->surface->h);
+
+	CustomFilterData data;
+	data.args = &lightBakeData->lightObject;
+	data.textureWidth = width;
+	data.textureHeight = height;
+
+	for (int i = 0; i < width; i++) {
+		if (lightBakeData->abort == true) {	//a way to abort the baking
+			lightBakeData->done = true;
+			return;
+		}
+		for (int j = 0; j < height; j++) {
+			int x = i - width / 2;	//the point passed to the filter function is recalculated from the center of the texture
+			int y = j - height / 2;
+			data.pixelColor = { 0, 0, 0, 0 };
+			data.x = x;
+			data.y = y;
+			filter(data);
+			drawPointInSurface(lightBakeData->surface, data.pixelColor, i, j);
+		}
+	}
+	lightBakeData->done = true;
+	return;
+}
+
+
 
 void Graphics::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *color, int width, int height, bool fill)
 {
@@ -697,60 +739,110 @@ void Graphics::BakeLightTexture(LightObjectData lightData) {
 }
 
 
+void Graphics::CompleteLightBaking() {
+	for (auto it = _lightBakingTasks.begin(); it != _lightBakingTasks.end();) {
+		if ((*it)->done) {
+			CompleteBakingLightTexture_Internal(*it);
+			it = _lightBakingTasks.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+}
+
+//starts the new thread that draw the surface of the light texture
 void Graphics::BakeLightTexture_Internal(LightObjectData& lightData) {
-	
-	DestroyTexture_Internal(lightData.lightTextureName);
 
 	if (lightData.type == LightType::POINT_LIGHT) {
 
-		_GameEngine->FindGameObject(DecodeName("MainCamera"));
+		//_GameEngine->FindGameObject(DecodeName("MainCamera"));
 		
 		SDL_Surface* surface = this->CreateSurface(_lightingOverlaySize.x, _lightingOverlaySize.x);
-		DrawCustomSurface(surface, _lightingOverlaySize.x, _lightingOverlaySize.x, PointLightFilter, &lightData);
+		//DrawCustomSurface(surface, _lightingOverlaySize.x, _lightingOverlaySize.x, PointLightFilter, &lightData);
+		if (surface == nullptr)
+			return;
 
-		SDL_Texture* temp_texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
-
-		SDL_Texture* texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _lightingOverlaySize.x, _lightingOverlaySize.x);
-		//SDL_LockTexture(texture, NULL, NULL, NULL);
-		SDL_SetRenderTarget(_renderer, texture);
-		SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
-		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
-		SDL_SetTextureBlendMode(temp_texture, SDL_BLENDMODE_NONE);
-		SDL_RenderCopy(_renderer, temp_texture, NULL, NULL);
-		SDL_SetRenderTarget(_renderer, NULL);
-		//SDL_UnlockTexture(texture);
-
-		SDL_FreeSurface(surface);
-		SDL_DestroyTexture(temp_texture);
-
-		if (texture != NULL) {
-			TextureData t = { lightData.lightTextureName, texture, 0 };
-			this->PushTexture(&t);
-		}
+		LightTextureBakeData* task = new LightTextureBakeData();
+		task->done = false;
+		task->lightObject = lightData;
+		task->surface = surface;
+		task->abort = false;
+		
+		SDL_LockSurface(surface);	//lock the surface before starting the new thread
+		_lightBakingTasks.push_back(task);
+		auto thr = std::thread([this, task]() {DrawLightSurface(task, _lightingOverlaySize.x, _lightingOverlaySize.x, PointLightFilter); });
+		thr.detach();
 	}
 	else if(lightData.type == LightType::GLOBAL_LIGHT) {
 		lightData.color.a = 255.0 * (1.0 - pow(1.7, -lightData.power));
+		
 
 		SDL_Surface* surface = this->CreateSurface(_lightingOverlaySize.x, _lightingOverlaySize.y);
-		DrawRectangleInSurface(surface, &lightData.color, _lightingOverlaySize.x, _lightingOverlaySize.y, true);
+		SDL_Rect sur_rect = {0, 0, _lightingOverlaySize.x, _lightingOverlaySize.y};
+		SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
+		uint32_t* color = reinterpret_cast<uint32_t*>(&lightData.color);
+		SDL_FillRect(surface, &sur_rect, *color);
 
-		SDL_Texture* temp_texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
+		if (surface == nullptr)
+			return;
 
-		SDL_Texture* texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _lightingOverlaySize.x, _lightingOverlaySize.y);
-		//SDL_LockTexture(texture, NULL, NULL, NULL);
-		SDL_SetRenderTarget(_renderer, texture);
-		SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
-		SDL_RenderCopy(_renderer, temp_texture, NULL, NULL);
-		SDL_SetRenderTarget(_renderer, NULL);
-		//SDL_UnlockTexture(texture);
+		LightTextureBakeData* task = new LightTextureBakeData();
+		task->done = true;
+		task->lightObject = lightData;
+		task->surface = surface;
+		task->abort = false;
 
-		SDL_FreeSurface(surface);
-		SDL_DestroyTexture(temp_texture);
-		if (texture != NULL) {
-			TextureData t = { lightData.lightTextureName, texture, 0 };
-			return this->PushTexture(&t);
-		}
+		SDL_LockSurface(surface);
+		_lightBakingTasks.push_back(task);
 	}
+}
+
+//transforms the light object surface into a texture and pushes it into the texture list
+void Graphics::CompleteBakingLightTexture_Internal(LightTextureBakeData* lightData) {
+	if (lightData->surface == nullptr)
+		return;
+
+	//unlock the surface before going on with the tasks
+	SDL_UnlockSurface(lightData->surface);
+	SDL_Texture* temp_texture = SDL_CreateTextureFromSurface(this->_renderer, lightData->surface);
+
+	SDL_Texture* texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _lightingOverlaySize.x, _lightingOverlaySize.x);
+	//SDL_LockTexture(texture, NULL, NULL, NULL);
+	SDL_SetRenderTarget(_renderer, texture);
+	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(temp_texture, SDL_BLENDMODE_NONE);
+	SDL_RenderCopy(_renderer, temp_texture, NULL, NULL);
+	SDL_SetRenderTarget(_renderer, NULL);
+	//SDL_UnlockTexture(texture);
+
+	SDL_FreeSurface(lightData->surface);
+	SDL_DestroyTexture(temp_texture);
+
+	if (texture != NULL) {
+		DestroyTexture_Internal(lightData->lightObject.lightTextureName);
+		TextureData t = { lightData->lightObject.lightTextureName, texture, 0 };
+		this->PushTexture(&t);
+	}
+}
+
+//create a task in the queue to stop alla light baking
+void Graphics::KillLightBaking() {
+	std::lock_guard <std::mutex> guard(request_mutex);
+
+	std::pair < GraphicRequestType, void*> request(GraphicRequestType::KILL_LIGHT_BAKING, nullptr);
+	this->_requests.push_back(request);
+}
+
+void Graphics::KillLightBaking_Internal() {
+	for (auto it = _lightBakingTasks.begin(); it != _lightBakingTasks.end(); it++) {
+		(*it)->abort = true;
+		while (!(*it)->done);	//waits the thread to finish
+		SDL_UnlockSurface((*it)->surface);
+		SDL_FreeSurface((*it)->surface);
+	}
+	_lightBakingTasks.clear();
 }
 
 void Graphics::DestroyTexture(EntityName name) {

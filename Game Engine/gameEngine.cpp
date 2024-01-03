@@ -551,7 +551,8 @@ void GameEngine::mainThread() {
 		std::chrono::duration<double> elapsed = endTime - startTime;
 		elapsedTime = elapsed.count();	//elapsed time in seconds
 
-		_graphicsEngine->PollRequests((1.0/renderFPS) - elapsedTime);	//handle some graphics requests
+		_graphicsEngine->CompleteLightBaking();	//finish light baking
+		_graphicsEngine->PollRequests((1.0/renderFPS) - elapsedTime);	//handle graphics requests
 
 		endTime = std::chrono::high_resolution_clock::now();
 		elapsed = endTime - startTime;
