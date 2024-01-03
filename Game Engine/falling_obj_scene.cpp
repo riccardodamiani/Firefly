@@ -48,6 +48,11 @@ void FallingObjScene::onload() {
 	GUI_Slider* slide = new GUI_Slider(DecodeName("loading_slider"), 9, slideAnim, { -0.4, 0.5 }, { 4, 0.4 }, 0, 100.0, 0.1, 0.9, 5);
 	slide->SetActive(false);
 
+	_graphicsEngine->SetLightingQuality(LightingQuality::HIGH_QUALITY);
+	auto a = new LightObject(DecodeName("globallight1"), { -7, 7 }, -75, 35, 180, { 255, 0, 0, 0 }, LightType::POINT_LIGHT);
+	a = new LightObject(DecodeName("globallight2"), { 7, 7 }, -105, 35, 180, { 0, 0, 255, 0 }, LightType::POINT_LIGHT);
+	_graphicsEngine->EnableSceneLighting(true, 1);
+
 	GameObject* cam = new Camera({ 32, 18 }, { 0, 0 }, 0);		//create a new camera in the scene
 
 	_GameEngine->SetGameFPS(600);
@@ -62,6 +67,7 @@ void FallingObjScene::onload() {
 	bodiesCount->SetConstraintParent(cam, true, true, true);
 
 	_GameEngine->AllocGlobalVariable_Double(DecodeName("timer"), 0.0);
+	_GameEngine->AllocGlobalVariable_Double(DecodeName("light_timer"), 3.0);
 	_GameEngine->AllocGlobalVariable_Double(DecodeName("loading_timer"), 0.5);
 
 	SDL_Color c1 = { 150, 50, 50, 150 };
@@ -69,10 +75,10 @@ void FallingObjScene::onload() {
 	_graphicsEngine->CreateCustomTexture(500, 300, texture_filter, DecodeName("button texture"), nullptr);
 	_graphicsEngine->CreateRectangleTexture(c2, 500, 300, true, DecodeName("button texture 1"));
 
-	GameObject* button = new GUI_Button(DecodeName("button"), DecodeName("button texture"), 3, { -1, -3 }, { 2, 0.5 }, 2);
+	GameObject* button = new GUI_Button(DecodeName("button"), DecodeName("button texture"), 3, { -1.2, -3 }, { 2, 0.5 }, 2);
 	button->SetConstraintParent(cam, true, true, true, true, true);
 
-	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1, -3 }, { 2, 0.5 }, 2);
+	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1.2, -3 }, { 2, 0.5 }, 2);
 
 	_graphicsEngine->CreateRectangleTexture(c1, 500, 300, true, DecodeName("poly collided"));
 	_graphicsEngine->CreateRectangleTexture(c2, 500, 300, true, DecodeName("poly not collided"));
@@ -156,11 +162,37 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 		}
 	}
 
-	Double* timer = (Double*)_GameEngine->GetGlobalVariable(DecodeName("timer"));
+	Double* timer = (Double*)_GameEngine->GetGlobalVariable(DecodeName("light_timer"));
 	if (timer) {
 		(*timer) -= timeElapsed;
 		if (*timer < 0) {
+			*timer = 3;
+			LightObject* globallight = (LightObject*)_GameEngine->FindGameObject(DecodeName("globallight1"));
+			if (globallight) {
+				std::random_device dev;
+				std::mt19937 rng(dev());
+				std::uniform_real_distribution<double> dist6(30, 40);
+				std::uniform_int_distribution<long> color_dist(1, 255);
+				globallight->SetColor({ (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), 0 });
+				globallight->SetPower(dist6(rng));
+			}
+			globallight = (LightObject*)_GameEngine->FindGameObject(DecodeName("globallight2"));
+			if (globallight) {
+				std::random_device dev;
+				std::mt19937 rng(dev());
+				std::uniform_real_distribution<double> dist6(30, 40);
+				std::uniform_int_distribution<long> color_dist(1, 255);
+				globallight->SetColor({ (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), 0 });
+				globallight->SetPower(dist6(rng));
+			}
+		}
+	}
 
+	timer = (Double*)_GameEngine->GetGlobalVariable(DecodeName("timer"));
+	if (timer) {
+		(*timer) -= timeElapsed;
+		if (*timer < 0) {
+			
 			GUI_Text* text = (GUI_Text*)_GameEngine->FindGameObject(DecodeName("render fps text"));
 			if (text != nullptr) {
 				text->setText("Render  FPS:  " + std::to_string(_GameEngine->GetRenderFPS()));
