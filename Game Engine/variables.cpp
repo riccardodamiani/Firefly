@@ -121,30 +121,34 @@ void Double::set(double val) {
 
 //Vector2
 Vector2::Vector2() {
-	value = std::make_shared<std::atomic<vector2>>(vector2{0, 0});
+	value_x = std::make_shared<std::atomic<double>>(0.0);
+	value_y = std::make_shared<std::atomic<double>>(0.0);
 }
 
 Vector2::Vector2(vector2 val) {
-	value = std::make_shared<std::atomic<vector2>>(val);
+	value_x = std::make_shared<std::atomic<double>>(val.x);
+	value_y = std::make_shared<std::atomic<double>>(val.y);
 }
 
 Vector2::Vector2(const Vector2& val) {
-	value = val.get_ptr();
+	value_x = val.get_ptr_x();
+	value_y = val.get_ptr_y();
 }
 
 double Vector2::x() {
-	return (*value).load().x;
+	return (*value_x).load();
 }
 
 double Vector2::y() {
-	return (*value).load().y;
+	return (*value_y).load();
 }
 
 vector2 Vector2::get() {
-	return *value;
+	return vector2{*value_x, *value_y};
 }
 
 void Vector2::set(vector2 val) {
 	std::lock_guard<std::mutex> guard(u_mutex);
-	*value = val;
+	*value_x = val.x;
+	*value_y = val.y;
 }

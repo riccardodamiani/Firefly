@@ -243,66 +243,76 @@ public:
 	void set(vector2 val);
 	double x();
 	double y();
-	std::shared_ptr <std::atomic<vector2>> get_ptr() const {
-		return value;
+	std::shared_ptr < std::atomic <double >> get_ptr_x() const {
+		return value_x;
+	}
+	std::shared_ptr <std::atomic<double>> get_ptr_y() const {
+		return value_y;
 	}
 	operator vector2() const {
-		return *value;
+		return vector2{ *value_x, *value_y };
 	}
 	Vector2& operator =(Vector2 val) {
 		std::lock_guard<std::mutex> guard(u_mutex);
-		value = val.get_ptr();
+		value_x = val.get_ptr_x();
+		value_y = val.get_ptr_y();
 		return *this;
 	}
 	Vector2& operator =(vector2 val) {
 		std::lock_guard<std::mutex> guard(u_mutex);
-		*value = val;
+		*value_x = val.x;
+		*value_y = val.y;
 		return *this;
 	}
 	Vector2& operator +=(vector2 val) {
 		
-		vector2 t = *value;
+		vector2 t = { *value_x, *value_y };
 		t.x = t.x + val.x;
 		t.y = t.y + val.y;
 		{
 			std::lock_guard<std::mutex> guard(u_mutex);
-			*value = t;
+			*value_x = t.x;
+			*value_y = t.y;
 		}
 		return *this;
 	}
 	Vector2& operator -=(vector2 val) {
-		vector2 t = *value;
+		vector2 t = { *value_x, *value_y };
 		t.x = t.x - val.x;
 		t.y = t.y - val.y;
 		{
 			std::lock_guard<std::mutex> guard(u_mutex);
-			*value = t;
+			*value_x = t.x;
+			*value_y = t.y;
 		}
 		return *this;
 	}
 	Vector2& operator *=(vector2 val) {
 
-		vector2 t = *value;
+		vector2 t = { *value_x, *value_y };
 		t.x *= val.x;
 		t.y *= val.y;
 		{
 			std::lock_guard<std::mutex> guard(u_mutex);
-			*value = t;
+			*value_x = t.x;
+			*value_y = t.y;
 		}
 		return *this;
 	}
 	Vector2& operator /=(vector2 val) {
-		vector2 t = *value;
+		vector2 t = { *value_x, *value_y };
 		t.x /= val.x;
 		t.y /= val.y;
 		{
 			std::lock_guard<std::mutex> guard(u_mutex);
-			*value = t;
+			*value_x = t.x;
+			*value_y = t.y;
 		}
 		return *this;
 	}
 private:
-	std::shared_ptr <std::atomic<vector2>> value;
+	std::shared_ptr <std::atomic<double>> value_x;
+	std::shared_ptr <std::atomic<double>> value_y;
 };
 
 #endif
