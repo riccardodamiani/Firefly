@@ -7,7 +7,7 @@
 class GUI_Droplist : public GUI_Element {
 public:
 	GUI_Droplist(EntityName objectName, unsigned int elementCode, EntityName mainTexture, EntityName background_texture,
-		EntityName fontAlias, vector2 pos, vector2 scale, int layer);
+		EntityName fontAlias, double textStartOffset, vector2 pos, vector2 scale, int layer);
 	~GUI_Droplist();
 	void update(double elapsedTime);
 	void applyAction(GuiAction mouseAction);
@@ -33,6 +33,7 @@ private:
 	std::vector <std::string> _elements;
 	std::vector <GUI_Text*> _texts;
 	GUI_Panel* bkPanel;
+	double _textStartOffset;
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include "gui_button.h"
 #include "gui_slider.h"
 #include "gui_panel.h"
+#include "gui_droplist.h"
 #include "test class.h"
 #include "projectile.h"
 #include "AnimatedSprite.h"
@@ -79,6 +80,12 @@ void FallingObjScene::onload() {
 	button->SetConstraintParent(cam, true, true, true, true, true);
 
 	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1.2, -3 }, { 2, 0.5 }, 2);
+
+	GUI_Droplist* droplist = new GUI_Droplist(DecodeName("droplist"), 12, DecodeName("droplist_icon"), DecodeName("droplist_bg"), DecodeName("redFont"), 0.2, {0, -4}, {3, 0.6}, 2);
+	droplist->addEntry("rosso");
+	droplist->addEntry("verde");
+	droplist->addEntry("blu");
+	droplist->addEntry("giallo");
 
 	_graphicsEngine->CreateRectangleTexture(c1, 500, 300, true, DecodeName("poly collided"));
 	_graphicsEngine->CreateRectangleTexture(c2, 500, 300, true, DecodeName("poly not collided"));
