@@ -81,7 +81,8 @@ void FallingObjScene::onload() {
 
 	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1.2, -3 }, { 2, 0.5 }, 2);
 
-	GUI_Droplist* droplist = new GUI_Droplist(DecodeName("droplist"), 12, DecodeName("droplist_icon"), DecodeName("droplist_bg"), DecodeName("redFont"), 0.2, {0, -4}, {3, 0.6}, 2);
+	GUI_Droplist* droplist = new GUI_Droplist(DecodeName("droplist"), 12, DecodeName("droplist_icon"), DecodeName("droplist_bg"), DecodeName("redFont"), 
+		0.2, {0, -4}, {2.5, 0.5}, 2);
 	droplist->addEntry("rosso");
 	droplist->addEntry("verde");
 	droplist->addEntry("blu");
@@ -96,7 +97,7 @@ void FallingObjScene::onload() {
 
 	for (int j = 0; j < 4; j++) {
 		for (int i = 0; i < 6; i++) {
-			new Test(DecodeName(""), false, { (double)(-8.0 + i * 3.4 + (j % 2) * 1.6), (double)(3 - j) * 1.8 });
+			new Test(DecodeName(""), { (double)(-8.0 + i * 3.4 + (j % 2) * 1.6), (double)(3 - j) * 1.8 });
 		}
 	}
 
@@ -143,7 +144,7 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 	if (camera) {
 		if (!load_sound) {
 			load_sound = true;
-			_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender", true, 100, { -20, 10 }));
+			_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender", true, 100, { 0, 0 }));
 			_audioTest->Play();
 		}
 		if (_InputEngine->didMouseWheelMove()) {
@@ -178,7 +179,7 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 			if (globallight) {
 				std::random_device dev;
 				std::mt19937 rng(dev());
-				std::uniform_real_distribution<double> dist6(30, 40);
+				std::uniform_real_distribution<double> dist6(10, 40);
 				std::uniform_int_distribution<long> color_dist(1, 255);
 				globallight->SetColor({ (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), 0 });
 				globallight->SetPower(dist6(rng));
@@ -187,7 +188,7 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 			if (globallight) {
 				std::random_device dev;
 				std::mt19937 rng(dev());
-				std::uniform_real_distribution<double> dist6(30, 40);
+				std::uniform_real_distribution<double> dist6(10, 40);
 				std::uniform_int_distribution<long> color_dist(1, 255);
 				globallight->SetColor({ (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), (uint8_t)color_dist(rng), 0 });
 				globallight->SetPower(dist6(rng));

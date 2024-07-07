@@ -15,7 +15,7 @@ Projectile::Projectile() {
 	_PhysicsEngine->createRegularPolygon(20, 0.5, mesh);
 	
 	AttachRigidbody(mesh);
-	this->setTexture(DecodeName("sphere"));
+	setTexture(DecodeName("sphere"));
 	rigidbody->SetBoundingBox(BoundingBoxType::CONVEX);
 	rigidbody->elasticity = 0.5;
 	rigidbody->mass = 5;

@@ -6,15 +6,13 @@
 
 class Test : public GameObject {
 public:
-	Test(EntityName name, bool circle, vector2 pos);
+	Test(EntityName name, vector2 pos);
 	void OnTriggerEnter(Collision&);
 	void OnTriggerExit(Collision&);
 	void OnTriggerStay(Collision&);
 	void update(double);
 	void setVelocity(vector2 vel);
 	void setAngVel(double vel);
-private:
-	bool circle;
 };
 
 #endif
