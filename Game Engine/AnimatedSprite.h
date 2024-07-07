@@ -21,6 +21,8 @@ public:
 	void nextStep();
 	void stopAnimation();		//stops the animation
 	bool isPlaying();		//return the playing status
+	void setLayer(uint16_t layer);
+	uint16_t getLayer();
 private:
 	std::vector <Sprite*> _sprites;
 	UInt _currentFrame;
@@ -30,6 +32,7 @@ private:
 	Bool _nextStep;
 	Bool step_by_step;
 	Bool _repeat;
+	std::atomic <uint16_t> _screenLayer;
 
 protected:
 	double _timeToUpdate;

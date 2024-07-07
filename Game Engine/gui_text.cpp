@@ -8,6 +8,7 @@ extern Graphics* const _graphicsEngine;
 //create a text object. Element type must be 'text', and textName must be a unique name
 GUI_Text::GUI_Text(EntityName objectName, unsigned int elementCode, EntityName atlasName, vector2 pos, vector2 scale, int layer) {
 	
+	setLayer(layer);
 	transform.position = pos;
 	transform.scale = scale;
 	this->_text = "";
@@ -20,7 +21,6 @@ GUI_Text::GUI_Text(EntityName objectName, unsigned int elementCode, EntityName a
 
 	this->_status = false;
 	this->_isPressed = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 	this->_minCharNum = 0;
 	RegisterObject(objectName);
@@ -58,7 +58,7 @@ void GUI_Text::draw() {
 	if (!this->visible) {
 		return;
 	}
-	_graphicsEngine->BlitTextSurface(_atlasName, _text, layer, transform.position, transform.scale, transform.rotation, TextureFlip::FLIP_NONE, (_cursorBlink&&_showCursor)?_cursorPos:-1);
+	_graphicsEngine->BlitTextSurface(_atlasName, _text, getLayer(), transform.position, transform.scale, transform.rotation, TextureFlip::FLIP_NONE, (_cursorBlink && _showCursor) ? _cursorPos : -1);
 }
 
 void GUI_Text::ShowCursor(bool show) {

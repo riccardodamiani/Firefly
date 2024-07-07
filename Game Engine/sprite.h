@@ -15,10 +15,12 @@ public:
 	void draw(vector2 pos, vector2 scale, double rot);
 	void setTexture(EntityName imageName);
 	void setFlip(TextureFlip flip = TextureFlip::FLIP_NONE);
+	void setLayer(uint16_t layer);
+	uint16_t getLayer();
 private:
 	std::atomic <EntityName> _imageName;
 	//std::atomic <int> _imageCode;
-	std::atomic <int> _screenLayer;
+	std::atomic <uint16_t> _screenLayer;
 	std::atomic <TextureFlip> _flip;
 	std::mutex update_mutex;
 };

@@ -20,6 +20,7 @@ GameObject::GameObject(){
 	_texture = nullptr;
 	rigidbody = nullptr;
 	group = 0x1;
+	_layer = 0;
 
 	transform.position = {0, 0};
 	transform.scale = { 1, 1 };
@@ -271,7 +272,7 @@ void GameObject::setTexture(EntityName textureName) {
 	Sprite* tempT;
 
 	tempT = _texture;
-	_texture = new Sprite(layer, textureName);
+	_texture = new Sprite(_layer, textureName);
 	if (tempT != nullptr) {
 		delete tempT;
 	}
@@ -424,6 +425,22 @@ Rigidbody* GameObject::GetRigidbody() {
 	return rigidbody;
 }
 
+
+void GameObject::setLayer(uint16_t layer) {
+	if (layer == _layer)
+		return;
+	if (_texture) {
+		_texture.load()->setLayer(layer);
+	}
+	for (auto it = _spriteAnimations.begin(); it != _spriteAnimations.end(); it++) {
+		(*it)->setLayer(layer);
+	}
+	_layer = layer;
+}
+
+uint16_t GameObject::getLayer() {
+	return _layer;
+}
 
 void GameObject::OnCollisionEnter(Collision& c) {}
 void GameObject::OnCollisionStay(Collision& c) {}

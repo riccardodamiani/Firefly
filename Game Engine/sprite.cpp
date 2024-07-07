@@ -9,9 +9,9 @@ extern Graphics* const _graphicsEngine;
 
 //create a sprite from a existing texture from the name 
 Sprite::Sprite(unsigned int screenLayer, EntityName imageName, TextureFlip flip) {
-	this->_imageName = imageName;
+	_imageName = imageName;
 	//this->_imageCode = _graphicsEngine->getImageCode(this->_imageName);
-	this->_screenLayer = screenLayer;
+	_screenLayer = screenLayer;
 	_flip = flip;
 }
 
@@ -29,12 +29,20 @@ void Sprite::setTexture(EntityName imageName) {
 
 	std::lock_guard <std::mutex> guard(update_mutex);
 	//this->_imageCode = _graphicsEngine->getImageCode(this->_imageName);
-	this->_imageName = imageName;
+	_imageName = imageName;
+}
+
+void Sprite::setLayer(uint16_t layer) {
+	_screenLayer = layer;
+}
+
+uint16_t Sprite::getLayer() {
+	return _screenLayer;
 }
 
 void Sprite::draw(vector2 pos, vector2 scale, double rot) {
 
-	_graphicsEngine->BlitSurface(_imageName, this->_screenLayer, pos, scale, rot, _flip);
+	_graphicsEngine->BlitSurface(_imageName, _screenLayer, pos, scale, rot, _flip);
 }
 
 void Sprite::update() {}

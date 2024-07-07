@@ -12,13 +12,13 @@ GUI_Button::GUI_Button(EntityName objectName, EntityName textureName, unsigned i
 	transform.position = pos;
 	transform.scale = rect;
 	
+	setLayer(layer);
 	_texture = new Sprite(layer, textureName);
 	this->active = true;
 	this->visible = true;
 	this->_status = false;
 	this->_isPressed = false;
 	this->_isMouseOn = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 
 	RegisterObject(objectName);

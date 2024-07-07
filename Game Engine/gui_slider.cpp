@@ -11,6 +11,7 @@
 GUI_Slider::GUI_Slider(EntityName objectName, unsigned int elementCode, std::vector <AnimatedSprite*> &animatedSprite, vector2 pos, vector2 rect,
 	double minSliderVal, double maxSliderVal, double minResponseRange, double maxResponseRate, int layer){
 
+	setLayer(layer);
 	_spriteAnimations = animatedSprite;
 
 	AnimateSprite(true);
@@ -24,7 +25,6 @@ GUI_Slider::GUI_Slider(EntityName objectName, unsigned int elementCode, std::vec
 	this->_status = false;
 	this->_isPressed = false;
 	this->_isMouseOn = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 	wasChanged = true;
 
@@ -41,6 +41,7 @@ GUI_Slider::GUI_Slider(EntityName objectName, unsigned int elementCode, Animated
 	double minSliderVal, double maxSliderVal, double minResponseRange,
 	double maxResponseRate, int layer) {
 
+	setLayer(layer);
 	if(spriteAnim != nullptr)
 		_spriteAnimations.push_back(spriteAnim);
 
@@ -55,7 +56,6 @@ GUI_Slider::GUI_Slider(EntityName objectName, unsigned int elementCode, Animated
 	this->_status = false;
 	this->_isPressed = false;
 	this->_isMouseOn = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 	wasChanged = true;
 

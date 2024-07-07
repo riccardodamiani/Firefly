@@ -73,9 +73,11 @@ public:
 	virtual void OnTriggerStay(Collision&);
 	virtual void OnTriggerExit(Collision&);
 
+	void setLayer(uint16_t layer);
+	uint16_t getLayer();
+
 	Transform transform;
 	UInt group;
-	UInt layer;		//stores the layer of the element (higher layers have priority over lower layers. The lowest layer is 0)
 protected:
 	void RegisterObject(EntityName name = 0);
 	
@@ -105,6 +107,7 @@ protected:
 private:
 	Bool animated;
 	std::vector <EntityName> _children;
+	UInt _layer;		//stores the layer of the element (higher layers have priority over lower layers. The lowest layer is 0)
 };
 
 #endif

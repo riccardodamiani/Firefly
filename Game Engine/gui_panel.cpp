@@ -11,6 +11,7 @@ GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName
 
 	transform.position = pos;
 	transform.scale = rect;
+	setLayer(layer);
 
 	_texture = new Sprite(layer, textureName);
 	this->active = true;
@@ -18,7 +19,6 @@ GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName
 	this->_isMouseOn = false;
 	this->_status = false;
 	this->_isPressed = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 	
 	RegisterObject(objectName);

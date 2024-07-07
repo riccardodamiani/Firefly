@@ -117,3 +117,17 @@ bool AnimatedSprite::isPlaying() {
 	return this->_playing;
 }
 
+void AnimatedSprite::setLayer(uint16_t layer) {
+	if (_screenLayer == layer) {
+		return;
+	}
+	for (auto it = _sprites.begin(); it != _sprites.end(); it++) {
+		(*it)->setLayer(layer);
+	}
+	_screenLayer = layer;
+}
+
+uint16_t AnimatedSprite::getLayer() {
+	return _screenLayer;
+}
+

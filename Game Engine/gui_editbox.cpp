@@ -10,6 +10,7 @@ extern Graphics* const _graphicsEngine;
 GUI_Editbox::GUI_Editbox(EntityName objName, unsigned int elementCode, EntityName textureName, std::string hintText, EntityName textFontAlias, EntityName hintFontAlias,
 	vector2 pos, vector2 scale, int layer) {
 	
+	setLayer(layer);
 	transform.position = pos;
 	transform.scale = scale;
 	_texture = new Sprite(layer, textureName);
@@ -19,7 +20,6 @@ GUI_Editbox::GUI_Editbox(EntityName objName, unsigned int elementCode, EntityNam
 	this->_status = false;
 	this->_isPressed = false;
 	this->_isMouseOn = false;
-	this->layer = layer;
 	this->elementCode = elementCode;
 
 	this->_isNumerical = false;
@@ -28,11 +28,11 @@ GUI_Editbox::GUI_Editbox(EntityName objName, unsigned int elementCode, EntityNam
 	vector2 textScale = {scale.x*0.9, scale.y*0.9};
 	RegisterObject(objName);
 
-	this->_text = new GUI_Text(0, -1, textFontAlias, pos, textScale, this->layer + 1);
+	this->_text = new GUI_Text(0, -1, textFontAlias, pos, textScale, getLayer() + 1);
 	_text->SetVisible(true);
 	_text->SetCursorPos(0);
 	_text->SetConstraintParent(this, true, true, true);
-	this->_hintText = new GUI_Text(0, -1, hintFontAlias, pos, textScale, this->layer + 1);
+	this->_hintText = new GUI_Text(0, -1, hintFontAlias, pos, textScale, getLayer() + 1);
 	this->_hintText->setText(hintText);
 	_hintText->SetConstraintParent(this, true, true, true);
 	

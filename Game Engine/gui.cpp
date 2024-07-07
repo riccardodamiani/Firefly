@@ -96,13 +96,13 @@ void GUI::beginNewFrame() {
 	//handle mutually exclusive actions
 	int maxLayer = -1;
 	for (int i = 0; i < elementActions.size(); i++) {	//find the highest layer
-		int layer = elementActions[i].element->layer;
+		int layer = elementActions[i].element->getLayer();
 		if (layer > maxLayer) {
 			maxLayer = layer;
 		}
 	}
 	for (int i = 0; i < elementActions.size(); i++) {
-		if (elementActions[i].element->layer == maxLayer) {		//action of the top element is approved
+		if (elementActions[i].element->getLayer() == maxLayer) {		//action of the top element is approved
 			if (elementActions[i].action == GuiAction::FOCUS) {		//requested focus
 				std::lock_guard <std::mutex> guard(focus_related_mutex);
 				focusedElement = elementActions[i].element;

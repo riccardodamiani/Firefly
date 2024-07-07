@@ -13,6 +13,7 @@ GUI_Droplist::GUI_Droplist(EntityName objectName, unsigned int elementCode, Enti
 	
 	transform.position = pos;
 	transform.scale = scale;
+	setLayer(layer);
 
 	_texture = new Sprite(layer, mainTexture);
 	bkPanel = new GUI_Panel((EntityName)0, -1, background_texture, { 0, 0 }, { 1, 1 }, layer);
@@ -23,7 +24,6 @@ GUI_Droplist::GUI_Droplist(EntityName objectName, unsigned int elementCode, Enti
 	this->_status = false;
 	this->_isPressed = false;
 	this->_isMouseOn = false;
-	this->layer = layer;
 	this->_fontAlias = fontAlias;
 	this->elementCode = elementCode;
 	_textStartOffset = textStartOffset;
@@ -48,7 +48,7 @@ GUI_Droplist::~GUI_Droplist() {
 void GUI_Droplist::addEntry(std::string entry) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	this->_elements.push_back(entry);
-	this->_texts.push_back(new GUI_Text(0, -1, this->_fontAlias, { 0, 0 }, transform.scale, this->layer + 1));
+	this->_texts.push_back(new GUI_Text(0, -1, this->_fontAlias, { 0, 0 }, transform.scale, getLayer() + 1));
 	this->_texts.back()->setText(entry);
 	this->_texts.back()->SetVisible(false);
 }
