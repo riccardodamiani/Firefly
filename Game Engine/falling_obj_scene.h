@@ -3,7 +3,7 @@
 
 #include "scene.h"
 #include "gameEngine.h"
-#include "audio_object.h"
+#include "audio_source.h"
 
 #include <memory>
 
@@ -14,8 +14,7 @@ public:
 	void onfree();
 	void scene_callback(GameEvent event, double timeElapsed);
 	void gui_listener(GUI_Element* element, GuiAction action);
-	std::shared_ptr <AudioObj> _audioTest;
-	bool load_sound;
+	AudioSource *_audioTest;
 	bool loading_scene;
 };
 

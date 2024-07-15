@@ -42,6 +42,9 @@ Game::~Game() {
 //In here you should load fonts, important textures,
 //create scenes and load the first scene of your game
 void Game::Init() {
+	std::vector <uint16_t> channels = {100};
+	_AudioEngine->ConfigEngine(channels, 128, 128);
+
 	//_graphicsEngine->LoadFontAtlas(DecodeName("blackFont"), { 50, 50, 50 }, { 0, 0, 0, 0 }, "TrulyMadlyDpad-Regular", 72);
 	_graphicsEngine->LoadFontAtlas(DecodeName("redFont"), { 200, 70, 70, 255 }, { 0, 0, 0, 0 }, "TrulyMadlyDpad-Regular", 72);
 	_graphicsEngine->LoadFontAtlas(DecodeName("whiteFont"), { 240, 240, 240, 255 }, { 0, 0, 0, 0 }, "TrulyMadlyDpad-Regular", 72);

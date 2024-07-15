@@ -59,6 +59,7 @@ GameEngine::GameEngine(){
 
 void GameEngine::GameEngine_Start(void) {
 	Game::Init();
+	_AudioEngine->Init();
 
 	_helperManager = new MultithreadManager(_helperCount);
 
@@ -433,6 +434,7 @@ void GameEngine::_GuiListener(GUI_Element* element, GuiAction action) {
 void GameEngine::ChangeScene_Internal(Scene *newScene) {
 
 	ClearGameObjects();
+	_AudioEngine->ClearAudio();
 	//FreeAllGlobalVars();
 	_GuiEngine->clearFocus();
 

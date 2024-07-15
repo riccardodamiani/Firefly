@@ -81,6 +81,9 @@ void FallingObjScene::onload() {
 
 	button = new GUI_Button(DecodeName("audio test button"), DecodeName("button texture"), 5, { 1.2, -3 }, { 2, 0.5 }, 2);
 
+	_audioTest = new AudioSource(EntityName("lavenderSound"), "lavender", 0, 30, true);
+	((GameObject*)_audioTest)->transform.position = { 0, 0 };
+
 	GUI_Droplist* droplist = new GUI_Droplist(DecodeName("droplist"), 12, DecodeName("droplist_icon"), DecodeName("droplist_bg"), DecodeName("redFont"), 
 		0.2, {0, -4}, {2.5, 0.5}, 2);
 	droplist->addEntry("rosso");
@@ -103,7 +106,6 @@ void FallingObjScene::onload() {
 
 	_PhysicsEngine->SetGravity({ 0, -9.81 });
 	_PhysicsEngine->SetSleepVelocity(0.05);
-	load_sound = false;
 	loading_scene = true;
 }
 
@@ -133,6 +135,7 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 			}
 			else {
 				loading_scene = false;
+				_audioTest->Play();
 				_GameEngine->FindGameObject(DecodeName("loading_slider"))->Destroy();
 				_GameEngine->FindGameObject(DecodeName("loading_panel"))->Destroy();
 			}
@@ -141,12 +144,7 @@ void FallingObjScene::scene_callback(GameEvent event, double timeElapsed) {
 	
 
 	GameObject* camera = _GameEngine->FindGameObject(DecodeName("MainCamera"));
-	if (camera) {
-		if (!load_sound) {
-			load_sound = true;
-			_audioTest = std::shared_ptr <UIAudioObj>(new UIAudioObj("lavender", true, 100, { 0, 0 }));
-			_audioTest->Play();
-		}
+	if (camera && !loading_scene) {
 		if (_InputEngine->didMouseWheelMove()) {
 			int wY = _InputEngine->getLastWheelMoviment().second;
 			if (wY > 0) {
@@ -228,11 +226,11 @@ void FallingObjScene::gui_listener(GUI_Element* element, GuiAction action) {
 	{
 		if (action == GuiAction::MOUSE_MOVED_OVER) {
 			((GameObject*)element)->setTexture(DecodeName("button texture 1"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 20, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::MOUSE_MOVED_OUT) {
 			((GameObject*)element)->setTexture(DecodeName("button texture"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 20, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::LEFT_BUTTON_UP) {
 			_GameEngine->LoadScene(1);
@@ -243,11 +241,11 @@ void FallingObjScene::gui_listener(GUI_Element* element, GuiAction action) {
 	{
 		if (action == GuiAction::MOUSE_MOVED_OVER) {
 			((GameObject*)element)->setTexture(DecodeName("button texture 1"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 20, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::MOUSE_MOVED_OUT) {
 			((GameObject*)element)->setTexture(DecodeName("button texture"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 20, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::LEFT_BUTTON_UP) {
 			if (_audioTest->GetStatus() == AUDIO_STATUS_PLAYING) {
@@ -256,21 +254,8 @@ void FallingObjScene::gui_listener(GUI_Element* element, GuiAction action) {
 			else if (_audioTest->GetStatus() == AUDIO_STATUS_PAUSE) {
 				_audioTest->Resume();
 			}
-		}
-		break;
-	}
-	case 4:		//slider
-	{
-		if (action == GuiAction::MOUSE_MOVED_OVER) {
-			_AudioEngine->PlayUIEffect(DecodeName("tic"));
-		}
-		else if (action == GuiAction::MOUSE_MOVED_OUT) {
-			_AudioEngine->PlayUIEffect(DecodeName("tic"));
-		}
-		else if (action == GuiAction::LEFT_BUTTON_DOWN) {
-			GameObject* light2 = _GameEngine->FindGameObject(DecodeName("light2"));
-			if (light2) {
-				light2->transform.rotation = ((GUI_Slider*)element)->getSliderValue();
+			else if (_audioTest->GetStatus() == AUDIO_STATUS_FINISHED) {
+				_audioTest->Play();
 			}
 		}
 		break;

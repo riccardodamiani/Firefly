@@ -7,152 +7,180 @@
 #include <atomic>
 #include "gameEngine.h"
 #include <memory>
-#include "audio_object.h"
+#include "audio_source.h"
 
 class Audio {
 	enum class AudioRequest {
-		PLAY_SOUND_EFFECT,
-		PLAY_UI_EFFECT,
-		PLAY_DIALOG,
-		PLAY_SOUNDTRACK,
+		PLAY_AUDIOTRACK,
+		PLAY_MUSIC,
+		SET_GROUP_VOLUME,
 		SET_MUSIC_VOLUME,
-		SET_DIALOG_VOLUME,
-		SET_SOUND_EFFECT_VOLUME,
-		SET_UI_EFFECT_VOLUME,
-		PAUSE_DIALOGS,
-		PAUSE_UI_EFFECTS,
+		PAUSE_GROUP,
 		PAUSE_MUSIC,
-		PAUSE_SOUND_EFFECTS,
-		RESUME_DIALOGS,
-		RESUME_SOUND_EFFECTS,
-		RESUME_UI_EFFECTS,
-		PAUSE_AUDIO_OBJECT,
-		RESUME_AUDIO_OBJECT,
-		STOP_AUDIO_OBJECT,
+		RESUME_GROUP,
 		RESUME_MUSIC,
 		STOP_MUSIC,
+		STOP_GROUP,
+		PAUSE_AUDIO_SOURCE,
+		RESUME_AUDIO_SOURCE,
+		STOP_AUDIO_SOURCE,
+		UPDATE_AUDIO_SOURCE
 	};
+
+	class AudioRequestData {
+	public:
+		virtual ~AudioRequestData() {};
+		AudioRequest type;
+	};
+
+	class AudioPlayData : public AudioRequestData {
+	public:
+		EntityName audioSrcName;
+		EntityName audioName;
+		vector2 position;
+		uint8_t audioGroup;
+		int maxDistance;
+		bool spatial_sound;
+	};
+
+	class MusicPlayData : public AudioRequestData {
+	public:
+		EntityName audioName;
+	};
+
+	class AudioVolumeData : public AudioRequestData {
+	public:
+		uint8_t group;
+		uint8_t volume;
+	};
+
+	class AudioControlData : public AudioRequestData {
+	public:
+		uint8_t group;
+	};
+
+	class AudioSrcControlData : public AudioRequestData {
+	public:
+		EntityName audioSrcName;
+	};
+
+	class AudioSrcUpdateData : public AudioRequestData {
+	public:
+		EntityName audioSrcName;
+		uint16_t channel;
+		vector2 position;
+		uint8_t group;
+		double maxDistance;
+	};
+
 
 	typedef struct mixChunkData {
 		Mix_Chunk* sound;
 		double length;
 	}MixChunkData;
 
-	typedef struct audioRequestData {
+	/*typedef struct audioRequestData {
 		AudioRequest type;
-		EntityName name;
+		EntityName audioSrcName;
 		int left;
 		int right;
 		int angle;
 		int distance;
 		int volume;
-		std::shared_ptr <AudioObj> audio_obj;
-	}AudioRequestData;
+	}AudioRequestData;*/
 public:
 	//Audio();
-	Audio(int effectChannels, int dialogsChannels, int uiChannels);
+	Audio();
 	~Audio();
 	
+	void Init();
+	void ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t defaultMusicVol, uint8_t defaultTrackVol);
 	unsigned long GetTaskQueueLen();
 
 	void PollRequests();
 
-	double GetDialogLen(EntityName dialog);
-	double GetSoundEffectLen(EntityName effect);
-	double GetUIEffectLen(EntityName effect);
+	double GetTrackLen(EntityName trackName);
 
-	void PlaySoundEffect(EntityName sound, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = {0, 0});
-	void PlayDialog(EntityName dialog, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
-	void PlayUIEffect(EntityName sound, std::shared_ptr<AudioObj> = nullptr, bool spatial_sound = false, double maxDistance = 0, vector2 source_position = { 0, 0 });
-	bool AudioPlaying(int channel, unsigned long trackId);
+	void PlayTrack(EntityName trackName, uint16_t audioGroup, double maxDistance, 
+		vector2 source_position, bool spatial_sound, EntityName audioSrcName);
+	bool AudioSourcePlaying(int channel, EntityName audioSource);
 
 	void PlayMusic(EntityName music);
 	bool IsPlayingMusic();
 
-	void SetMusicVolume(int volume);
-	void SetSoundEffectVolume(int volume);
-	void SetDialogsVolume(int volume);
-	void SetUIEffectsVolume(int volume);
+	void SetMusicVolume(uint8_t volume);
+	void SetGroupVolume(uint8_t volume, uint8_t audioGroup);
 
 	int GetMusicVolume();
-	int GetSoundEffectVolume();
-	int GetDialogsVolume();
-	int GetUIEffectsVolume();
+	int GetGroupVolume(uint8_t audioGroup);
 
 	void PauseAll();
 	void ResumeAll();
-	/*void pauseSoundChannel(int channel);
-	void resumeSoundChannel(int channel);*/
+	void StopAll();
 
-	void PauseSoundEffects();
-	void ResumeSoundEffects();
-	void PauseDialogs();
-	void ResumeDialogs();
-	void PauseUIEffects();
-	void ResumeUIEffects();
-	void PauseAudioObject(std::shared_ptr <AudioObj> audio_obj);
-	void ResumeAudioObject(std::shared_ptr <AudioObj> audio_obj);
-	void StopAudioObject(std::shared_ptr <AudioObj> audio_obj);
+	void PauseGroup(uint8_t audioGroup);
+	void ResumeGroup(uint8_t audioGroup);
+	void StopGroup(uint8_t audioGroup);
+
+	void PauseAudioSource(EntityName audioSrcName);
+	void ResumeAudioSource(EntityName audioSrcName);
+	void StopAudioSource(EntityName audioSrcName);
+	void updateAudioSource(EntityName audioSrcName, uint16_t channel, vector2 position, double distance, uint8_t group);
 
 	void PauseMusic();
 	void ResumeMusic();
 	void StopMusic();
-	void StopAll();
+
+	void ClearAudio();
 private:
 	unsigned long int getChunkTimeMilliseconds(Mix_Chunk* chunk);
+	bool calc_spatial_sound_panning(double maxDistance, vector2 position, uint8_t& left, uint8_t& right);
 	void loadSoundFileInFolder(std::string directory);
 
-	void PlaySoundEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj);
-	void PlayDialog_Internal(EntityName dialog, int left, int right, std::shared_ptr <AudioObj> audio_obj);
-	void PlayUIEffect_Internal(EntityName sound, int left, int right, std::shared_ptr <AudioObj> audio_obj);
+	bool PlayTrack_Internal(AudioPlayData*);
 
 	void PlayMusic_Internal(EntityName music);
 
-	void SetMusicVolume_Internal(int volume);
-	void SetSoundEffectVolume_Internal(int volume);
-	void SetDialogsVolume_Internal(int volume);
-	void SetUIEffectsVolume_Internal(int volume);
+	void SetMusicVolume_Internal(AudioVolumeData*);
+	void SetGroupVolume_Internal(AudioVolumeData*);
 
-	void PauseSoundEffects_Internal();
-	void ResumeSoundEffects_Internal();
-	void PauseDialogs_Internal();
-	void ResumeDialogs_Internal();
-	void PauseUIEffects_Internal();
-	void ResumeUIEffects_Internal();
-	void PauseAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
-	void ResumeAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
-	void StopAudioObject_Internal(std::shared_ptr <AudioObj> audio_obj);
+	void PauseGroup_Internal(AudioControlData*);
+	void ResumeGroup_Internal(AudioControlData* data);
+	void StopGroup_Internal(AudioControlData* data);
+
+	void PauseAudioSource_Internal(AudioSrcControlData*);
+	void ResumeAudioSource_Internal(AudioSrcControlData*);
+	void StopAudioSource_Internal(AudioSrcControlData*);
+	void updateAudioSource_Internal(AudioSrcUpdateData*);
 
 	void PauseMusic_Internal();
 	void ResumeMusic_Internal();
 	void StopMusic_Internal();
 
-	std::map <EntityName, MixChunkData> _soundEffects;
-	std::map <EntityName, MixChunkData> _dialogs;
-	std::map <EntityName, MixChunkData> _uiSoundEffects;
-	std::map <EntityName, Mix_Music*> _soundtracks;
+	std::map <EntityName, MixChunkData> _audioChunks;
+	std::map <EntityName, Mix_Music*> _musicTracks;
 	
 	bool _mute;
 	bool _playSoundtrack;
-	bool _playSoundEffects;
-	bool _playDialog;
-	bool _playUISounds;
 	bool _playRandomMusic;
 
 	std::atomic <int> _musicVolume;
-	std::atomic <int> _effectsVolume;
-	std::atomic <int> _dialogVolume;
-	std::atomic <int> _uiSoundVolume;
+	std::atomic <int>* _audioGroupVolume;
+	uint8_t _defaultMusicVolume;
+	uint8_t _defaultTrackVolume;
 
 	int _channelsToAllocate;
-	int _dialogChannels;
-	int _uiSoundChannels;
-	int _effectsChannel;
+	std::vector <unsigned short> _audioGroupChannels;
+	//first value is the starting channel of the group, second value is the ending channel of the group (included)
+	std::pair <uint16_t, uint16_t>* _audioGroupChRange;
 
 	bool playing_music;
 
-	std::vector <AudioRequestData> _requests;
-	std::shared_ptr <AudioObj>* _audioObjTracks;
+	std::vector <AudioRequestData*> _requests;
+	std::vector <AudioRequestData*> _rescheduledRequests;
+
+	//keeps track of which audio source is in control of a audio channel
+	EntityName *_channelMaster;
 
 	std::mutex update_mutex;
 	std::mutex request_mutex;

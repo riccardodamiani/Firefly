@@ -100,7 +100,7 @@
     <ClCompile Include="light_scene.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="audio_object.cpp">
+    <ClCompile Include="audio_source.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -213,7 +213,7 @@
     <ClInclude Include="light_scene.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="audio_object.h">
+    <ClInclude Include="audio_source.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

@@ -32,7 +32,7 @@ namespace {
 		graphicsE = new Graphics(MODE_WINDOW_MAX_SIZE, 0, 0, 10);
 		GE = new GameEngine();
 		guiE = new GUI();
-		AE = new Audio(100, 5, 5);
+		AE = new Audio();
 		iE = new Input(*guiE);
 		pE = new PhysicsEngine();
 		return true;

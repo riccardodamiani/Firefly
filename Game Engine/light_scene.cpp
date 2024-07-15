@@ -139,11 +139,11 @@ void LightScene::gui_listener(GUI_Element* element, GuiAction action) {
 	{
 		if (action == GuiAction::MOUSE_MOVED_OVER) {
 			((GameObject*)element)->setTexture(DecodeName("button texture 1"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 30, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::MOUSE_MOVED_OUT) {
 			((GameObject*)element)->setTexture(DecodeName("button texture"));
-			_AudioEngine->PlayUIEffect(DecodeName("tic"), nullptr, true, 30, element->transform.position);
+			_AudioEngine->PlayTrack(DecodeName("tic"), 0, 30, element->transform.position, true, 0);
 		}
 		else if (action == GuiAction::LEFT_BUTTON_UP) {
 			_GameEngine->LoadScene(0);
