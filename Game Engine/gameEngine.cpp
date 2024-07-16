@@ -58,7 +58,7 @@ GameEngine::GameEngine(){
 
 
 void GameEngine::GameEngine_Start(void) {
-	Game::Init();
+	InitGame();
 	_AudioEngine->Init();
 
 	_helperManager = new MultithreadManager(_helperCount);

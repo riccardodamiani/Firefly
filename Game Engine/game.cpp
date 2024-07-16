@@ -26,22 +26,13 @@
 #include "projectile.h"
 #include "falling_obj_scene.h"
 #include "light_scene.h"
+#include "game_definitions.h"
 
-//class Game
-//holds the information about the game
-
-Game::Game() {
-
-}
-
-Game::~Game() {
-
-}
 
 //This function is called before the game starts.
 //In here you should load fonts, important textures,
 //create scenes and load the first scene of your game
-void Game::Init() {
+void InitGame() {
 	std::vector <uint16_t> channels = {100};
 	_AudioEngine->ConfigEngine(channels, 128, 128);
 
@@ -56,9 +47,3 @@ void Game::Init() {
 	_GameEngine->CreateScene(new LightScene(1));
 	_GameEngine->LoadScene(0);
 }
-
-/*
-void rot_func(double time, TransformStruct& val, void* ptr) {
-	val.rotation = -time * 360;
-}
-*/
