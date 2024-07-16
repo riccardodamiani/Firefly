@@ -183,6 +183,7 @@
     <ClInclude Include="gameEngine.h" />
     <ClInclude Include="gameObject.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="game_definitions.h" />
     <ClInclude Include="lightObject.h" />
     <ClInclude Include="light_scene.h" />
     <ClInclude Include="multithreadManager.h" />
