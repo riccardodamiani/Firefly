@@ -1,11 +1,2 @@
-x64/
-Release/
-Debug/
+Build/
 .vs/
-todo.txt
-Game Engine/Data/
-Game Engine/Fonts/
-Game Engine/Debug/
-Game Engine/Sound/
-Game Engine/Release/
-Game Engine/x64/
