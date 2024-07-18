@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "threadHelper.h"
 #include "multithreadManager.h"
 #include <thread>

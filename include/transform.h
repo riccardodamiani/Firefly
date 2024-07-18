@@ -6,30 +6,6 @@
 #include <mutex>
 
 #define PI 3.14159265358979323846
-/*
-class Transform_Position;
-class Transform_Scale;
-class Transform_Rotation;
-
-typedef unsigned long long EntityName;
-
-class Transform {
-public:
-	Transform();
-	operator TransformStruct() const;
-	Transform& operator=(TransformStruct val);
-	//Transform& operator=(const Transform& other);
-	Transform_Position& position;
-	Transform_Scale& scale;
-	Transform_Rotation& rotation;
-	void SetContraintChild(EntityName child, bool transl_x, bool transl_y, bool scale_x, bool scale_y, bool rot);
-	void RemoveConstraintChild(EntityName child);
-	void ApplyScale(vector2 scale, vector2 pivotPoint);
-	void ApplyRotation(double rotation, vector2 pivotPoint);
-private:
-	std::mutex u_mutex;
-};*/
-
 
 typedef struct Transform {
 	Vector2 position;

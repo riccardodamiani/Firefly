@@ -1,11 +1,9 @@
 
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_editbox.h"
 #include "gui_text.h"
 #include "graphics.h"
 #include "gameEngine.h"
-
-extern Graphics* const _graphicsEngine;
 
 GUI_Editbox::GUI_Editbox(EntityName objName, unsigned int elementCode, EntityName textureName, std::string hintText, EntityName textFontAlias, EntityName hintFontAlias,
 	vector2 pos, vector2 scale, int layer) {
@@ -48,13 +46,13 @@ void GUI_Editbox::applyAction(GuiAction mouseAction) {
 	switch (mouseAction) {
 	case GuiAction::FOCUS:
 		this->_isPressed = false;
-		_InputEngine->StartTextInput();
+		InputEngine::getInstance().StartTextInput();
 		_text->ShowCursor(true);
 		this->_status = true;
 		break;
 	case GuiAction::REMOVE_FOCUS:
 		this->_status = false;
-		_InputEngine->StopTextInput();
+		InputEngine::getInstance().StopTextInput();
 		_text->ShowCursor(false);
 		break;
 
@@ -77,15 +75,15 @@ void GUI_Editbox::applyAction(GuiAction mouseAction) {
 void GUI_Editbox::update(double elapsedTime) {
 	vector2 mousePos;
 
-	if (_status && _InputEngine->wasMouseButtonPressed(SDL_BUTTON_LEFT)) {	//remove focus
+	if (_status && InputEngine::getInstance().wasMouseButtonPressed(SDL_BUTTON_LEFT)) {	//remove focus
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (!(mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//out of the rectangle
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::REMOVE_FOCUS, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::REMOVE_FOCUS, this);
 			this->_isMouseOn = false;
 			this->_isPressed = false;
 			return;
@@ -95,30 +93,30 @@ void GUI_Editbox::update(double elapsedTime) {
 	if (this->_isMouseOn) {	//mouse was on the button
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (!(mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//out of the rectangle
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
 			this->_isMouseOn = false;
 			this->_isPressed = false;
 			return;
 		}
 		else {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
 		}
 	}
 	else {
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//mouse on
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
 			return;
 		}
 		return;
@@ -126,15 +124,15 @@ void GUI_Editbox::update(double elapsedTime) {
 
 	//you can get down here only if the mouse is on the button so no need to recheck it
 	if (this->_isPressed) {		//button was pressed
-		if (_InputEngine->wasMouseButtonReleased(SDL_BUTTON_LEFT)) {
+		if (InputEngine::getInstance().wasMouseButtonReleased(SDL_BUTTON_LEFT)) {
 			this->_isPressed = false;
-			_GuiEngine->RegisterGuiAction(GuiAction::FOCUS, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::FOCUS, this);
 			return;
 		}
 	}
 	else {		//button is not pressed
-		if (_InputEngine->wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
+		if (InputEngine::getInstance().wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
 			return;
 		}
 	}
@@ -154,8 +152,8 @@ void GUI_Editbox::setActive(bool active) {
 	this->_isMouseOn = false;
 
 	if (!this->active && _status) {		//if is focused
-		_InputEngine->StopTextInput();
-		_GuiEngine->RegisterGuiAction(GuiAction::REMOVE_FOCUS, this);
+		InputEngine::getInstance().StopTextInput();
+		GUIEngine::getInstance().RegisterGuiAction(GuiAction::REMOVE_FOCUS, this);
 	}
 }
 

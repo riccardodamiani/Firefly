@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "gameObject.h"
+#include "entity.h"
 
 //Audio sources are used to keep ownership of a audio track (effect, ui effect or dialog sound). This is useful to be able to play, pause and stop a 
 //track or to know the status of a audio track.

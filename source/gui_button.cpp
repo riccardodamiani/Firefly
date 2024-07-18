@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_element.h"
 #include "gui_button.h"
 #include "gui.h"
@@ -30,30 +30,30 @@ void GUI_Button::update(double elapsedTime) {
 	if (this->_isMouseOn) {	//mouse was on the button
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if ( !( mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//out of the rectangle
 				mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 				mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 				mousePos.y <= thisPos.y + thisRect.y / 2.0 )  ) {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
 			this->_isMouseOn = false;
 			this->_isPressed = false;
 			return;
 		}
 		else {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
 		}
 	}
 	else {
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//mouse on
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
 			return;
 		}
 		return;
@@ -61,15 +61,15 @@ void GUI_Button::update(double elapsedTime) {
 
 	//you can get down here only if the mouse is on the button so no need to recheck it
 	if (this->_isPressed) {		//button was pressed
-		if (_InputEngine->wasMouseButtonReleased(SDL_BUTTON_LEFT)) {
+		if (InputEngine::getInstance().wasMouseButtonReleased(SDL_BUTTON_LEFT)) {
 			this->_isPressed = false;
-			_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_UP, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_UP, this);
 			return;
 		}
 	}
 	else {		//button is not pressed
-		if (_InputEngine->wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
+		if (InputEngine::getInstance().wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
 			return;
 		}
 	}

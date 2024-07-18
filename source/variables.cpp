@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "variables.h"
 #include "structures.h"
 #include <atomic>

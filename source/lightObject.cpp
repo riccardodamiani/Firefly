@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "lightObject.h"
 #include "graphics.h"
 
@@ -16,7 +16,7 @@ LightObject::LightObject(EntityName name, vector2 position, double rotation, Lig
 			_original = originalLight;
 	}
 	
-	_objectName = _GameEngine->RegisterLightObject(this, name);
+	_objectName = GameEngine::getInstance().RegisterLightObject(this, name);
 
 }
 
@@ -33,8 +33,8 @@ LightObject::LightObject(EntityName name, vector2 position, double rotation, dou
 	_type = type;
 	_color = color;
 
-	_lightTexture = _GameEngine->GenerateRandomName();
-	_objectName = _GameEngine->RegisterLightObject(this, name);
+	_lightTexture = GameEngine::getInstance().GenerateRandomName();
+	_objectName = GameEngine::getInstance().RegisterLightObject(this, name);
 
 	CalculateLight();
 }
@@ -155,8 +155,8 @@ void LightObject::CalculateLight() {
 		_lightRadius = lightRadius;
 
 		//calculate the coefficients of the parabola that aproximate the light decay
-		_graphicsEngine->Calculate_Parabola_Coeff_From_Points(0, power, lightRadius, 0, 2 * lightRadius, power, parab_a, parab_b, parab_c);
+		GraphicsEngine::getInstance().Calculate_Parabola_Coeff_From_Points(0, power, lightRadius, 0, 2 * lightRadius, power, parab_a, parab_b, parab_c);
 		//bake light
 	}
-	_graphicsEngine->BakeLightTexture(GetLightData());
+	GraphicsEngine::getInstance().BakeLightTexture(GetLightData());
 }

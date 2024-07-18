@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gameObject.h"
 #include "gameEngine.h"
 #include "AnimatedSprite.h"
@@ -44,12 +44,12 @@ void GameObject::Destroy(void) {
 
 	visible = false;
 	active = false;
-	_GameEngine->DestroyGameObject(this->_objectName);
+	GameEngine::getInstance().DestroyGameObject(this->_objectName);
 
 	GameObject* child;
 	std::lock_guard <std::mutex> guard(children_mutex);
 	for (int i = 0; i < _children.size(); i++) {
-		child = _GameEngine->FindGameObject(_children[i]);
+		child = GameEngine::getInstance().FindGameObject(_children[i]);
 		if (child != nullptr) {
 			child->Destroy();
 		}
@@ -63,7 +63,7 @@ void GameObject::Destroy(void) {
 * This function must be called one and only one time in the object contructor otherwise the object will not be displayed nor updated.
 */
 void GameObject::RegisterObject(EntityName name) {
-	_objectName = _GameEngine->RegisterGameObject(this, name);
+	_objectName = GameEngine::getInstance().RegisterGameObject(this, name);
 }
 
 //return the Entity Name
@@ -77,7 +77,7 @@ void GameObject::SetActive(bool new_active) {
 
 	std::lock_guard <std::mutex> guard(children_mutex);
 	for (int i = 0; i < _children.size(); i++) {
-		child = _GameEngine->FindGameObject(_children[i]);
+		child = GameEngine::getInstance().FindGameObject(_children[i]);
 		if (child != nullptr) {
 			child->SetActive(new_active);
 		}
@@ -90,7 +90,7 @@ void GameObject::SetVisible(bool new_visible) {
 
 	std::lock_guard <std::mutex> guard(children_mutex);
 	for (int i = 0; i < _children.size(); i++) {
-		child = _GameEngine->FindGameObject(_children[i]);
+		child = GameEngine::getInstance().FindGameObject(_children[i]);
 		if (child != nullptr) {
 			child->SetVisible(new_visible);
 		}
@@ -155,7 +155,7 @@ void GameObject::SetParent(EntityName objectName) {
 	if (objectName == this->_objectName || objectName == 0)
 		return;
 	
-	GameObject * parent = _GameEngine->FindGameObject(objectName);
+	GameObject * parent = GameEngine::getInstance().FindGameObject(objectName);
 	if (parent == nullptr)
 		return;
 	parent->SetChild(this->_objectName);
@@ -281,7 +281,7 @@ void GameObject::setTexture(EntityName textureName) {
 
 void GameObject::SetConstraintParent(EntityName objectName, bool translation, bool rotation, bool scale) {
 	GameObject* obj;
-	if ((obj = _GameEngine->FindGameObject(objectName)) == nullptr || obj == this) return;
+	if ((obj = GameEngine::getInstance().FindGameObject(objectName)) == nullptr || obj == this) return;
 	_constraintParent = { objectName, translation, translation, scale, scale, rotation,
 		obj->transform.position, obj->transform.scale, obj->transform.rotation };
 
@@ -296,7 +296,7 @@ void GameObject::SetConstraintParent(GameObject* object, bool translation, bool 
 
 void GameObject::SetConstraintParent(EntityName objectName, bool translation_x, bool translation_y, bool scale_x, bool scale_y, bool rotation) {
 	GameObject* obj;
-	if ((obj = _GameEngine->FindGameObject(objectName)) == nullptr || obj == this) return;
+	if ((obj = GameEngine::getInstance().FindGameObject(objectName)) == nullptr || obj == this) return;
 	_constraintParent = { objectName, translation_x, translation_y, scale_x, scale_y, rotation,
 		obj->transform.position, obj->transform.scale, obj->transform.rotation };
 
@@ -353,7 +353,7 @@ void GameObject::updateConstraintParenting() {
 	if (_constraintParent.parent == 0)
 		return;
 
-	GameObject* p = _GameEngine->FindGameObject(_constraintParent.parent);
+	GameObject* p = GameEngine::getInstance().FindGameObject(_constraintParent.parent);
 
 	if (p == nullptr) {	
 		_constraintParent.parent = 0;

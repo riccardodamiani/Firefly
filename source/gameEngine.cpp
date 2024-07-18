@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "gameEngine.h"
+#include "entity.h"
 #include "gameObject.h"
 #include "graphics.h"
 #include "structures.h"
@@ -13,6 +13,7 @@
 #include "platform.h"
 #include "lightObject.h"
 #include "scene.h"
+#include "game_options.h"
 
 #include <chrono>
 #include <thread>
@@ -57,15 +58,28 @@ GameEngine::GameEngine(){
 }
 
 
-void GameEngine::GameEngine_Start(void) {
+void GameEngine::GameEngine_Start(GraphicsOptions& g_options, AudioOptions& a_options) {
+	Init_Engines(g_options, a_options);
 	InitGame();
-	_AudioEngine->Init();
 
 	_helperManager = new MultithreadManager(_helperCount);
 
 	std::thread t1(&GameEngine::gameThread, this);
 	t1.detach();
 	mainThread();
+}
+
+void GameEngine::Init_Engines(GraphicsOptions& g_options, AudioOptions& a_options){
+	//init sdl
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
+	SDL_Init(SDL_INIT_EVERYTHING);
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+	TTF_Init();
+
+	//init other engines
+	GraphicsEngine::getInstance().Init(g_options);
+	AudioEngine::getInstance().Init(a_options);
+	InputEngine::getInstance().Init();
 }
 
 
@@ -217,7 +231,7 @@ void GameEngine::DestroyGameObject_Internal(EntityName name) {
 	
 	if (found) {
 		GameObject* obj = _objects[index].obj;
-		_PhysicsEngine->RemoveRigidbody(obj->GetRigidbody());
+		PhysicsEngine::getInstance().RemoveRigidbody(obj->GetRigidbody());
 
 		_garbageCollector.push_back(std::pair <GameObject*, int>(obj, 10));		//the object will be destroyed in 10 frames
 		_objects.erase(_objects.begin() + index);
@@ -249,7 +263,7 @@ void GameEngine::DestroyGameObject(EntityName name) {
 void GameEngine::RegisterGameObject_Internal(GameObject* obj, EntityName name) {
 	
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 	WriteLock w_lock(object_vector_mutex);
 
@@ -265,7 +279,7 @@ void GameEngine::RegisterGameObject_Internal(GameObject* obj, EntityName name) {
 
 void GameEngine::RegisterLightObject_Internal(GameObject* obj, EntityName name) {
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 	WriteLock w_lock(object_vector_mutex);
 
@@ -289,7 +303,7 @@ EntityName GameEngine::RegisterGameObject(GameObject* obj, EntityName name) {
 		return 0;
 
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 
 	std::lock_guard <std::mutex> guard(request_mutex);
@@ -308,7 +322,7 @@ EntityName GameEngine::RegisterLightObject(LightObject* obj, EntityName name) {
 		return 0;
 
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 
 	std::lock_guard <std::mutex> guard(request_mutex);
@@ -434,12 +448,12 @@ void GameEngine::_GuiListener(GUI_Element* element, GuiAction action) {
 void GameEngine::ChangeScene_Internal(Scene *newScene) {
 
 	ClearGameObjects();
-	_AudioEngine->ClearAudio();
+	AudioEngine::getInstance().ClearAudio();
 	//FreeAllGlobalVars();
-	_GuiEngine->clearFocus();
+	GUIEngine::getInstance().clearFocus();
 
 	//disable scene lighting
-	_graphicsEngine->EnableSceneLighting(false);
+	GraphicsEngine::getInstance().EnableSceneLighting(false);
 
 	//free current scene
 	if(currentScene != nullptr)
@@ -507,10 +521,10 @@ vector2 GameEngine::LastClickPosition() {
 }
 
 void GameEngine::updateMouse() {
-	std::pair <int, int> click = _InputEngine->getLastClickPosition();
-	std::pair <int, int> mouse = _InputEngine->getMousePosition();
-	_lastClickPosition = _graphicsEngine->screenToSpace(click.first, click.second);
-	_mousePosition = _graphicsEngine->screenToSpace(mouse.first, mouse.second);
+	std::pair <int, int> click = InputEngine::getInstance().getLastClickPosition();
+	std::pair <int, int> mouse = InputEngine::getInstance().getMousePosition();
+	_lastClickPosition = GraphicsEngine::getInstance().screenToSpace(click.first, click.second);
+	_mousePosition = GraphicsEngine::getInstance().screenToSpace(mouse.first, mouse.second);
 }
 
 double GameEngine::GetRenderFPS() {
@@ -536,25 +550,25 @@ void GameEngine::mainThread() {
 	while (true) {
 
 		auto startTime = std::chrono::high_resolution_clock::now();
-		_InputEngine->beginNewFrame();
+		InputEngine::getInstance().beginNewFrame();
 
 		//_syncBarrier->wait();	//syncs with the game thread
 
-		_AudioEngine->PollRequests();
+		AudioEngine::getInstance().PollRequests();
 
-		if (_InputEngine->GetLastEvent() == InputEvent::CLOSE_WINDOW) {
+		if (InputEngine::getInstance().GetLastEvent() == InputEvent::CLOSE_WINDOW) {
 			_lastGameEvent = GameEvent::GAME_QUIT;
 		}
 
-		_graphicsEngine->SwapScreenBuffersGraphics();
-		_graphicsEngine->Flip();
+		GraphicsEngine::getInstance().SwapScreenBuffersGraphics();
+		GraphicsEngine::getInstance().Flip();
 
 		auto endTime = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = endTime - startTime;
 		elapsedTime = elapsed.count();	//elapsed time in seconds
 
-		_graphicsEngine->CompleteLightBaking();	//finish light baking
-		_graphicsEngine->PollRequests((1.0/renderFPS) - elapsedTime);	//handle graphics requests
+		GraphicsEngine::getInstance().CompleteLightBaking();	//finish light baking
+		GraphicsEngine::getInstance().PollRequests((1.0/renderFPS) - elapsedTime);	//handle graphics requests
 
 		endTime = std::chrono::high_resolution_clock::now();
 		elapsed = endTime - startTime;
@@ -623,7 +637,7 @@ void GameEngine::draw_helper_routine(int start_index, int end_index, void* args)
 void GameEngine::physics_helper_routine(int start_index, int end_index, void* args) {
 
 	PhysicsHelperData* d = (PhysicsHelperData*)args;
-	_PhysicsEngine->UpdatePhysics(d->timeElapsed, start_index, d->threads);
+	PhysicsEngine::getInstance().UpdatePhysics(d->timeElapsed, start_index, d->threads);
 
 }
 
@@ -657,7 +671,7 @@ void GameEngine::gameThread() {
 
 			}
 			if (_lastGameEvent == GameEvent::GAME_QUIT) {
-				_GameEngine->Quit();
+				GameEngine::getInstance().Quit();
 			}
 		}
 
@@ -670,13 +684,13 @@ void GameEngine::gameThread() {
 		_helperManager->Wait();
 
 		_helperManager->startWork(_objects.size(), post_update_helper_routine, &data);	//start post update (parenting and stuff)
-		_GuiEngine->beginNewFrame();	//handle gui events
+		GUIEngine::getInstance().beginNewFrame();	//handle gui events
 		_helperManager->Wait();
 
 		//save the current state of the camera for rendering to avoid gliches when a object is parented to the camera
 		GameObject* camera = this->FindGameObject(DecodeName("MainCamera"));
 		if (camera == nullptr) {
-			_graphicsEngine->updateRenderCamera(false, { 0, 0 }, { 0, 0 }, 0);
+			GraphicsEngine::getInstance().updateRenderCamera(false, { 0, 0 }, { 0, 0 }, 0);
 		}
 		else {
 			vector2 camScale = camera->transform.scale;
@@ -689,18 +703,18 @@ void GameEngine::gameThread() {
 			_helperManager->startWork(_objects.size(), draw_helper_routine, &d_data);		//start draw
 			_helperManager->Wait();
 
-			_graphicsEngine->updateRenderCamera(true, camPos, camScale, camera->transform.rotation);
+			GraphicsEngine::getInstance().updateRenderCamera(true, camPos, camScale, camera->transform.rotation);
 
-			_graphicsEngine->SwapScreenBuffersPhysics();	//swap buffers
+			GraphicsEngine::getInstance().SwapScreenBuffersPhysics();	//swap buffers
 
 		}
 
 		//update physics
 		PhysicsHelperData p_data = { elapsedTime, _helperCount };
-		_PhysicsEngine->NewPhysicsFrame(elapsedTime);
+		PhysicsEngine::getInstance().NewPhysicsFrame(elapsedTime);
 		_helperManager->startWork(_helperCount, physics_helper_routine, &p_data);
 		_helperManager->Wait();
-		_PhysicsEngine->ResolvePhysics(elapsedTime);
+		PhysicsEngine::getInstance().ResolvePhysics(elapsedTime);
 
 
 		auto endTime = std::chrono::high_resolution_clock::now();

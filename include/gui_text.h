@@ -2,6 +2,7 @@
 #define GUI_TEXT_H
 
 #include "gui_element.h"
+#include "entity.h"
 
 struct SDL_Color;
 

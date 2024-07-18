@@ -1,7 +1,8 @@
-#include "stdafx.h"
 #include "audio.h"
 #include "gameEngine.h"
 #include "gameObject.h"
+#include "entity.h"
+#include "game_options.h"
 
 #include <SDL_mixer.h>
 #include <filesystem>
@@ -12,18 +13,26 @@
 
 namespace fs = std::filesystem;
 
-Audio::Audio() {
+AudioEngine::AudioEngine() {
 	
 }
 
-Audio::~Audio() {
+AudioEngine::~AudioEngine() {
 	Mix_CloseAudio();
 	Mix_Quit();
 }
 
-void Audio::Init() {
-	this->_playRandomMusic = false;
+void AudioEngine::Init(AudioOptions& options) {
+	_channelsToAllocate = 0;
 
+	_defaultMusicVolume = options.defaultMusicVol;
+	_defaultTrackVolume = options.defaultTrackVol;
+	_audioGroupChannels = options.groupChannels;
+	for (auto it = _audioGroupChannels.begin(); it != _audioGroupChannels.end(); it++) {
+		_channelsToAllocate += *it;
+	}
+
+	_playRandomMusic = false;
 	_mute = false;
 
 	_channelMaster = new EntityName[_channelsToAllocate];
@@ -56,7 +65,7 @@ void Audio::Init() {
 	this->loadSoundFileInFolder("Sound");		//load sound files
 }
 
-void Audio::ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t defaultMusicVol, uint8_t defaultTrackVol) {
+void AudioEngine::ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t defaultMusicVol, uint8_t defaultTrackVol) {
 	_channelsToAllocate = 0;
 
 	_defaultMusicVolume = defaultMusicVol;
@@ -67,11 +76,11 @@ void Audio::ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t de
 	}
 }
 
-unsigned long Audio::GetTaskQueueLen() {
+unsigned long AudioEngine::GetTaskQueueLen() {
 	return _requests.size();
 }
 
-void Audio::loadSoundFileInFolder(std::string directory) {
+void AudioEngine::loadSoundFileInFolder(std::string directory) {
 
 	try {
 		for (auto& dirEntry : fs::recursive_directory_iterator(directory)) {
@@ -124,7 +133,7 @@ void Audio::loadSoundFileInFolder(std::string directory) {
 	
 }
 
-void Audio::PollRequests() {
+void AudioEngine::PollRequests() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	playing_music = Mix_PlayingMusic();
@@ -213,7 +222,7 @@ void Audio::PollRequests() {
 	}
 }
 
-double Audio::GetTrackLen(EntityName trackName) {
+double AudioEngine::GetTrackLen(EntityName trackName) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
 	if (_audioChunks.find(trackName) != _audioChunks.end()) {
@@ -222,17 +231,17 @@ double Audio::GetTrackLen(EntityName trackName) {
 	return 0;
 }
 
-bool Audio::IsPlayingMusic() {
+bool AudioEngine::IsPlayingMusic() {
 	return playing_music;
 }
 
-unsigned long int Audio::getChunkTimeMilliseconds(Mix_Chunk *chunk){
+unsigned long int AudioEngine::getChunkTimeMilliseconds(Mix_Chunk *chunk){
 	Uint32 points = 0;
 	Uint32 frames = 0;
 	int freq = 0;
 	Uint16 fmt = 0;
 	int chans = 0;
-	// Chunks are converted to audio device format…
+	// Chunks are converted to audio device formatï¿½
 	if (!Mix_QuerySpec(&freq, &fmt, &chans))
 		return 0; // never called Mix_OpenAudio() ? !
 
@@ -246,12 +255,12 @@ unsigned long int Audio::getChunkTimeMilliseconds(Mix_Chunk *chunk){
 	return ((frames * 1000) / freq);
 }
 
-bool Audio::calc_spatial_sound_panning(double maxDistance, vector2 position, uint8_t& left, uint8_t& right) {
+bool AudioEngine::calc_spatial_sound_panning(double maxDistance, vector2 position, uint8_t& left, uint8_t& right) {
 	double Dleft, Dright;
 	double power = 255;
 	left = right = 255;
 	//calculate panning for spatial sound
-	GameObject* camera = _GameEngine->FindGameObject(DecodeName("MainCamera"));
+	GameObject* camera = GameEngine::getInstance().FindGameObject(DecodeName("MainCamera"));
 	if (!camera) {
 		return false;
 	}
@@ -282,7 +291,7 @@ source_position: source position of the sound (leave blank if not using spacial 
 spatial_sound: set to true to enable spatial sound (leave blank if not using spatial sound)
 audioSrcName: internal use only (leave blank)
 */
-void Audio::PlayTrack(EntityName trackName,
+void AudioEngine::PlayTrack(EntityName trackName,
 	uint16_t audioGroup, double maxDistance = 0, vector2 source_position = {0, 0},
 	bool spatial_sound = false, EntityName audioSrcName = 0) {
 	
@@ -302,12 +311,12 @@ void Audio::PlayTrack(EntityName trackName,
 	_requests.push_back(data);
 }
 
-bool Audio::PlayTrack_Internal(AudioPlayData* data) {
+bool AudioEngine::PlayTrack_Internal(AudioPlayData* data) {
 	if (!data)
 		return true;
 	AudioSource* as = nullptr;
 	if (data->audioSrcName != 0) {
-		as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(data->audioSrcName));
+		as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(data->audioSrcName));
 		if (!as) {
 			return false;	//not created yet: reschedule the request
 		}
@@ -331,7 +340,7 @@ bool Audio::PlayTrack_Internal(AudioPlayData* data) {
 	return true;
 }
 
-bool Audio::AudioSourcePlaying(int channel, EntityName audioSource) {
+bool AudioEngine::AudioSourcePlaying(int channel, EntityName audioSource) {
 	if (channel < 0 || channel > _channelsToAllocate)
 		return false;
 
@@ -345,7 +354,7 @@ bool Audio::AudioSourcePlaying(int channel, EntityName audioSource) {
 	return false;
 }
 
-void Audio::PlayMusic(EntityName music) {
+void AudioEngine::PlayMusic(EntityName music) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	MusicPlayData *data = new MusicPlayData();
@@ -356,7 +365,7 @@ void Audio::PlayMusic(EntityName music) {
 }
 
 
-void Audio::SetMusicVolume(uint8_t volume) {
+void AudioEngine::SetMusicVolume(uint8_t volume) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioVolumeData* data = new AudioVolumeData();
@@ -365,16 +374,16 @@ void Audio::SetMusicVolume(uint8_t volume) {
 	_requests.push_back(data);
 }
 
-int Audio::GetMusicVolume() {
+int AudioEngine::GetMusicVolume() {
 	return _musicVolume;
 }
 
-int Audio::GetGroupVolume(uint8_t audioGroup) {
+int AudioEngine::GetGroupVolume(uint8_t audioGroup) {
 	return _audioGroupVolume[audioGroup];
 	
 }
 
-void Audio::PauseAll() {
+void AudioEngine::PauseAll() {
 
 	for (int i = 0; i < _audioGroupChannels.size(); i++) {
 		PauseGroup(i);
@@ -382,14 +391,14 @@ void Audio::PauseAll() {
 	PauseMusic();
 }
 
-void Audio::ResumeAll() {
+void AudioEngine::ResumeAll() {
 	for (int i = 0; i < _audioGroupChannels.size(); i++) {
 		ResumeGroup(i);
 	}
 	ResumeMusic();
 }
 
-void Audio::StopAll() {
+void AudioEngine::StopAll() {
 
 	for (int i = 0; i < _audioGroupChannels.size(); i++) {
 		StopGroup(i);
@@ -397,7 +406,7 @@ void Audio::StopAll() {
 	StopMusic();
 }
 
-void Audio::PauseGroup(uint8_t audioGroup) {
+void AudioEngine::PauseGroup(uint8_t audioGroup) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioControlData* data = new AudioControlData();
@@ -406,12 +415,12 @@ void Audio::PauseGroup(uint8_t audioGroup) {
 	_requests.push_back(data);
 }
 
-void Audio::PauseGroup_Internal(AudioControlData *data) {
+void AudioEngine::PauseGroup_Internal(AudioControlData *data) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	for (int i = _audioGroupChRange[data->group].first; i <= _audioGroupChRange[data->group].second; i++) {
 		Mix_Pause(i);
 		if (_channelMaster[i] != 0) {
-			AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(_channelMaster[i]));
+			AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(_channelMaster[i]));
 			if (as == nullptr)	//invalid channel
 				continue;
 			as->__setStatus(AudioStatus::AUDIO_STATUS_PAUSE);
@@ -419,7 +428,7 @@ void Audio::PauseGroup_Internal(AudioControlData *data) {
 	}
 }
 
-void Audio::StopGroup(uint8_t audioGroup) {
+void AudioEngine::StopGroup(uint8_t audioGroup) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioControlData* data = new AudioControlData();
@@ -428,12 +437,12 @@ void Audio::StopGroup(uint8_t audioGroup) {
 	_requests.push_back(data);
 }
 
-void Audio::StopGroup_Internal(AudioControlData* data) {
+void AudioEngine::StopGroup_Internal(AudioControlData* data) {
 	if (!data) return;
 	std::lock_guard <std::mutex> guard(update_mutex);
 	for (int i = _audioGroupChRange[data->group].first; i <= _audioGroupChRange[data->group].second; i++) {
 		if (_channelMaster[i] != 0 && Mix_Playing(i)) {
-			AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(_channelMaster[i]));
+			AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(_channelMaster[i]));
 			if (as == nullptr)	//invalid channel
 				continue;
 			as->__setStatus(AudioStatus::AUDIO_STATUS_STOPPED);
@@ -442,7 +451,7 @@ void Audio::StopGroup_Internal(AudioControlData* data) {
 	}
 }
 
-void Audio::ResumeGroup(uint8_t audioGroup) {
+void AudioEngine::ResumeGroup(uint8_t audioGroup) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioControlData* data = new AudioControlData();
@@ -451,11 +460,11 @@ void Audio::ResumeGroup(uint8_t audioGroup) {
 	_requests.push_back(data);
 }
 
-void Audio::ResumeGroup_Internal(AudioControlData* data) {
+void AudioEngine::ResumeGroup_Internal(AudioControlData* data) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	for (int i = _audioGroupChRange[data->group].first; i <= _audioGroupChRange[data->group].second; i++) {
 		if (_channelMaster[i] != 0 && Mix_Paused(i)) {
-			AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(_channelMaster[i]));
+			AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(_channelMaster[i]));
 			if (as == nullptr)	//invalid channel
 				continue;
 			as->__setStatus(AudioStatus::AUDIO_STATUS_PLAYING);
@@ -464,7 +473,7 @@ void Audio::ResumeGroup_Internal(AudioControlData* data) {
 	}
 }
 
-void Audio::PauseAudioSource(EntityName audioSrcName) {
+void AudioEngine::PauseAudioSource(EntityName audioSrcName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioSrcControlData* data = new AudioSrcControlData();
@@ -473,10 +482,10 @@ void Audio::PauseAudioSource(EntityName audioSrcName) {
 	_requests.push_back(data);
 }
 
-void Audio::PauseAudioSource_Internal(AudioSrcControlData* data) {
+void AudioEngine::PauseAudioSource_Internal(AudioSrcControlData* data) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
-	AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(data->audioSrcName));
+	AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(data->audioSrcName));
 
 	if (as == nullptr)	//invalid channel
 		return;
@@ -492,7 +501,7 @@ void Audio::PauseAudioSource_Internal(AudioSrcControlData* data) {
 	}
 }
 
-void Audio::ResumeAudioSource(EntityName audioSrcName) {
+void AudioEngine::ResumeAudioSource(EntityName audioSrcName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioSrcControlData* data = new AudioSrcControlData();
@@ -501,10 +510,10 @@ void Audio::ResumeAudioSource(EntityName audioSrcName) {
 	_requests.push_back(data);
 }
 
-void Audio::ResumeAudioSource_Internal(AudioSrcControlData* data) {
+void AudioEngine::ResumeAudioSource_Internal(AudioSrcControlData* data) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
-	AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(data->audioSrcName));
+	AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(data->audioSrcName));
 
 	if (as == nullptr)	//invalid channel
 		return;
@@ -523,7 +532,7 @@ void Audio::ResumeAudioSource_Internal(AudioSrcControlData* data) {
 }
 
 
-void Audio::StopAudioSource(EntityName audioSrcName) {
+void AudioEngine::StopAudioSource(EntityName audioSrcName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioSrcControlData* data = new AudioSrcControlData();
@@ -532,10 +541,10 @@ void Audio::StopAudioSource(EntityName audioSrcName) {
 	_requests.push_back(data);
 }
 
-void Audio::StopAudioSource_Internal(AudioSrcControlData* data) {
+void AudioEngine::StopAudioSource_Internal(AudioSrcControlData* data) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
-	AudioSource* as = dynamic_cast<AudioSource*>(_GameEngine->FindGameObject(data->audioSrcName));
+	AudioSource* as = dynamic_cast<AudioSource*>(GameEngine::getInstance().FindGameObject(data->audioSrcName));
 
 	if (as == nullptr)	//invalid channel
 		return;
@@ -554,7 +563,7 @@ void Audio::StopAudioSource_Internal(AudioSrcControlData* data) {
 	}
 }
 
-void Audio::updateAudioSource(EntityName audioSrcName, uint16_t channel, vector2 position, double distance, uint8_t group) {
+void AudioEngine::updateAudioSource(EntityName audioSrcName, uint16_t channel, vector2 position, double distance, uint8_t group) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioSrcUpdateData* data = new AudioSrcUpdateData();
@@ -567,7 +576,7 @@ void Audio::updateAudioSource(EntityName audioSrcName, uint16_t channel, vector2
 	_requests.push_back(data);
 }
 
-void Audio::updateAudioSource_Internal(AudioSrcUpdateData *data) {
+void AudioEngine::updateAudioSource_Internal(AudioSrcUpdateData *data) {
 	if (!data)
 		return;
 
@@ -584,7 +593,7 @@ void Audio::updateAudioSource_Internal(AudioSrcUpdateData *data) {
 }
 
 
-void Audio::PauseMusic() {
+void AudioEngine::PauseMusic() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioRequestData* data = new AudioRequestData();
@@ -592,7 +601,7 @@ void Audio::PauseMusic() {
 	_requests.push_back(data);
 }
 
-void Audio::ResumeMusic() {
+void AudioEngine::ResumeMusic() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioRequestData* data = new AudioRequestData();
@@ -600,7 +609,7 @@ void Audio::ResumeMusic() {
 	_requests.push_back(data);
 }
 
-void Audio::StopMusic() {
+void AudioEngine::StopMusic() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	AudioRequestData* data = new AudioRequestData();
@@ -608,7 +617,7 @@ void Audio::StopMusic() {
 	_requests.push_back(data);
 }
 
-void Audio::PlayMusic_Internal(EntityName music) {
+void AudioEngine::PlayMusic_Internal(EntityName music) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 
 	if (this->_musicTracks.find(music) != _musicTracks.end() && this->_playSoundtrack) {
@@ -616,7 +625,7 @@ void Audio::PlayMusic_Internal(EntityName music) {
 	}
 }
 
-void Audio::SetMusicVolume_Internal(AudioVolumeData *data) {
+void AudioEngine::SetMusicVolume_Internal(AudioVolumeData *data) {
 	if (!data)
 		return;
 	std::lock_guard <std::mutex> guard(update_mutex);
@@ -625,7 +634,7 @@ void Audio::SetMusicVolume_Internal(AudioVolumeData *data) {
 }
 
 
-void Audio::SetGroupVolume(uint8_t volume, uint8_t audioGroup) {
+void AudioEngine::SetGroupVolume(uint8_t volume, uint8_t audioGroup) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	if (volume < 0 || volume > 255 || audioGroup >= _audioGroupChannels.size()) {
@@ -638,7 +647,7 @@ void Audio::SetGroupVolume(uint8_t volume, uint8_t audioGroup) {
 	_requests.push_back(data);
 }
 
-void Audio::SetGroupVolume_Internal(AudioVolumeData* data) {
+void AudioEngine::SetGroupVolume_Internal(AudioVolumeData* data) {
 	if (!data)
 		return;
 	std::lock_guard <std::mutex> guard(update_mutex);
@@ -648,17 +657,17 @@ void Audio::SetGroupVolume_Internal(AudioVolumeData* data) {
 	}
 }
 
-void Audio::PauseMusic_Internal() {
+void AudioEngine::PauseMusic_Internal() {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	Mix_PausedMusic();
 }
 
-void Audio::ResumeMusic_Internal() {
+void AudioEngine::ResumeMusic_Internal() {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	Mix_ResumeMusic();
 }
 
-void Audio::StopMusic_Internal() {
+void AudioEngine::StopMusic_Internal() {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	Mix_RewindMusic();
 	//Mix_PausedMusic();
@@ -666,7 +675,7 @@ void Audio::StopMusic_Internal() {
 }
 
 //internal use only: stop all audio and clear channel masters
-void Audio::ClearAudio() {
+void AudioEngine::ClearAudio() {
 	{
 		std::lock_guard <std::mutex> guard(request_mutex);
 		memset(_channelMaster, 0, sizeof(EntityName) * _channelsToAllocate);

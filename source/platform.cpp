@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "platform.h"
 
 #ifdef _WIN32

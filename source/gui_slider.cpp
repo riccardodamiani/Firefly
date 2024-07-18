@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_element.h"
 #include "gui_slider.h"
 #include "structures.h"
@@ -106,43 +106,43 @@ void GUI_Slider::update(double elapsedTime) {
 	if (this->_isMouseOn) {	//mouse was on the button
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (!(mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//out of the rectangle
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
 			this->_isMouseOn = false;
 			this->_isPressed = false;
 			return;
 		}
 		else {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
 		}
 	}
 	else {
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//mouse on
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
 			return;
 		}
 		return;
 	}
 
 	//you can get down here only if the mouse is on the slider so no need to recheck it
-	if (_InputEngine->isMouseButtonHeld(SDL_BUTTON_LEFT)) {
+	if (InputEngine::getInstance().isMouseButtonHeld(SDL_BUTTON_LEFT)) {
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		//leaves the gui engine decide if the slider was pressed or not
 		_lastMousePosition = mousePos;
-		_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
+		GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
 	}
 }
 

@@ -161,8 +161,14 @@ struct Mesh {
 
 class PhysicsEngine {
 public:
-	//internal calls, don't use
-	PhysicsEngine();
+    static PhysicsEngine& getInstance() {
+        static PhysicsEngine instance;
+        return instance;
+    }
+
+    PhysicsEngine(const PhysicsEngine&) = delete;
+    PhysicsEngine& operator=(const PhysicsEngine&) = delete;
+	
 	void RegisterRigidbody(Rigidbody *);
 	void RemoveRigidbody(Rigidbody *);
 	void _updateStatic(Rigidbody* r);
@@ -181,6 +187,9 @@ public:
 	void SetSleepVelocity(double velocity);
 	
 private:
+	PhysicsEngine() = default;
+	~PhysicsEngine() = default;
+
 	void Check_Convex_Convex_Collision(double timeElapsed, Rigidbody *r1, BoundingBox& box1, 
 		Rigidbody* r2, BoundingBox& box2, std::vector <CollisionStruct>& frameColl,
 		FMesh& mesh1, FMesh& mesh2);

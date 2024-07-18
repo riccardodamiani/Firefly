@@ -1,9 +1,7 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_text.h"
 #include "gui_element.h"
 #include "graphics.h"
-
-extern Graphics* const _graphicsEngine;
 
 //create a text object. Element type must be 'text', and textName must be a unique name
 GUI_Text::GUI_Text(EntityName objectName, unsigned int elementCode, EntityName atlasName, vector2 pos, vector2 scale, int layer) {
@@ -47,7 +45,7 @@ vector2 GUI_Text::getCursorPosition(int cursorIndex) {
 	vector2 startScale = transform.scale;
 	double startRot = transform.rotation;
 	vector2 startPos = transform.position;
-	vector2 textSize = _graphicsEngine->GetTextSize(_atlasName, _text, cursorIndex, transform.scale.y());
+	vector2 textSize = GraphicsEngine::getInstance().GetTextSize(_atlasName, _text, cursorIndex, transform.scale.y());
 	vector2 delta = { textSize.x - startScale.x/2, -textSize.y};
 	vector2 cursorPos = { startPos.x + delta.x * std::cos(startRot * (M_PI / 180.0)), startPos.y + delta.y + delta.x * std::sin(startRot * (M_PI / 180.0)) };
 	return cursorPos;
@@ -58,7 +56,7 @@ void GUI_Text::draw() {
 	if (!this->visible) {
 		return;
 	}
-	_graphicsEngine->BlitTextSurface(_atlasName, _text, getLayer(), transform.position, transform.scale, transform.rotation, TextureFlip::FLIP_NONE, (_cursorBlink && _showCursor) ? _cursorPos : -1);
+	GraphicsEngine::getInstance().BlitTextSurface(_atlasName, _text, getLayer(), transform.position, transform.scale, transform.rotation, TextureFlip::FLIP_NONE, (_cursorBlink && _showCursor) ? _cursorPos : -1);
 }
 
 void GUI_Text::ShowCursor(bool show) {

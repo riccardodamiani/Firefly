@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "camera.h"
 #include "gameEngine.h"
 #include "gameObject.h"

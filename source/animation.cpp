@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "animation.h"
 #include "gameEngine.h"
 #include "structures.h"

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "scene.h"
 #include "audio.h"
 
@@ -40,7 +39,7 @@ unsigned int Scene::getID() {
 
 //return the percentage of scene loading. Not that tis is just an appoximation
 float Scene::GetLoadingState() {
-	unsigned long current_tasks = _graphicsEngine->GetTaskQueueLen() + _GameEngine->GetTaskQueueLen() + _AudioEngine->GetTaskQueueLen();
+	unsigned long current_tasks = GraphicsEngine::getInstance().GetTaskQueueLen() + GameEngine::getInstance().GetTaskQueueLen() + AudioEngine::getInstance().GetTaskQueueLen();
 	float current_percentage = (((float)_startingTasks - current_tasks) / _startingTasks) * 100.0;
 
 	//avoid loading going backwards
@@ -53,6 +52,6 @@ float Scene::GetLoadingState() {
 //initialize the calculation for the loading state of a scene
 //this is called by the game engine after onLoad() function
 void Scene::InitLoadingStateCalc() {
-	_startingTasks = _graphicsEngine->GetTaskQueueLen() + _GameEngine->GetTaskQueueLen() + _AudioEngine->GetTaskQueueLen();
+	_startingTasks = GraphicsEngine::getInstance().GetTaskQueueLen() + GameEngine::getInstance().GetTaskQueueLen() + AudioEngine::getInstance().GetTaskQueueLen();
 	_loadingPerc = 0;
 }

@@ -7,8 +7,6 @@
 #include <atomic>
 #include <mutex>
 
-class Graphics;
-class GUI;
 struct vector2;
 
 enum class InputEvent {
@@ -17,10 +15,18 @@ enum class InputEvent {
 	CLOSE_WINDOW
 };
 
-class Input {
+class InputEngine {
 public:
-	[[deprecated]] Input();		//DEPRECATED. Use Input::Input(GUI &) instead
-	Input(GUI &gui);
+	static InputEngine& getInstance() {
+        static InputEngine instance;
+        return instance;
+    }
+
+    InputEngine(const InputEngine&) = delete;
+    InputEngine& operator=(const InputEngine&) = delete;
+
+	Init();
+
 	//set the state of a key or a mouse button
 	void beginNewFrame();
 	void getSDLEvent();
@@ -50,7 +56,9 @@ public:
 	InputEvent GetLastEvent();
 
 private:
-	
+	InputEngine() = default;
+	~InputEngine() = default;
+
 	std::array <std::atomic <bool>, SDL_Scancode::SDL_NUM_SCANCODES> _heldKeys;
 	std::array <std::atomic <bool>, SDL_Scancode::SDL_NUM_SCANCODES> _pressedKeys;
 	std::array <std::atomic <bool>, SDL_Scancode::SDL_NUM_SCANCODES> _releasedKeys;
@@ -64,7 +72,6 @@ private:
 	std::atomic <bool> _didMouseWheelMove;
 	std::atomic <std::pair <int, int>> _lastWheelMoviment;
 	std::atomic <bool> _didMouseMove;
-	GUI* _gui;
 	std::atomic <SDL_EventType> _lastEvent;
 	std::vector <InputEvent> _inputPoll;
 

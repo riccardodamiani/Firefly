@@ -1,8 +1,5 @@
-#include "stdafx.h"
 #include "AnimatedSprite.h"
 #include "graphics.h"
-
-extern Graphics* const _graphicsEngine;
 
 AnimatedSprite::~AnimatedSprite() {
 	for (int i = 0; i < this->_sprites.size(); i++) {

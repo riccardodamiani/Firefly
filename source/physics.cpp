@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "physics.h"
 #include "rigidbody.h"
 #include "gameObject.h"

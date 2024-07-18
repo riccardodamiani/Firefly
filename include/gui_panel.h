@@ -2,6 +2,7 @@
 #define GUI_PANEL_H
 
 #include "gui_element.h"
+#include "entity.h"
 
 //class of gui element: panel
 //a panel is a rectangular object. It is interactive (so it interact with the mouse click), but do not return eny event.

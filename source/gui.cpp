@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GUI.h"
 #include "input.h"
 #include "gui_element.h"
@@ -14,19 +13,17 @@
 #include <map>
 #include <mutex>
 
-extern Graphics* const _graphicsEngine;
-
-GUI::GUI() {
+GUIEngine::GUIEngine() {
 	
 }
 
 
-void GUI::RegisterGuiAction(GuiAction action, GUI_Element* element) {
+void GUIEngine::RegisterGuiAction(GuiAction action, GUI_Element* element) {
 	std::lock_guard <std::mutex> guard(update_mutex);
 	elementActions.push_back({ element , action });
 }
 
-void GUI::appendTextInFocusedEditbox(std::string text) {
+void GUIEngine::appendTextInFocusedEditbox(std::string text) {
 
 	if (text == "")
 		return;
@@ -37,41 +34,41 @@ void GUI::appendTextInFocusedEditbox(std::string text) {
 	}
 }
 
-void GUI::incrementCursorInFocusedEditbox() {
+void GUIEngine::incrementCursorInFocusedEditbox() {
 	GUI_Element* f = focusedElement;
 	if (f != nullptr && f->isEditbox()) {
 		((GUI_Editbox*)f)->incrementCursorPos();
 	}
 }
 
-void GUI::decrementCursorInFocusedEditbox() {
+void GUIEngine::decrementCursorInFocusedEditbox() {
 	GUI_Element* f = focusedElement;
 	if (f != nullptr && f->isEditbox()) {
 		((GUI_Editbox*)f)->decrementCursorPos();
 	}
 }
 
-void GUI::backspaceInFocusedEditbox() {
+void GUIEngine::backspaceInFocusedEditbox() {
 	GUI_Element* f = focusedElement;
 	if (f != nullptr && f->isEditbox()) {
 		((GUI_Editbox*)f)->backspace();
 	}
 }
 
-void GUI::cancelInFocusedEditbox() {
+void GUIEngine::cancelInFocusedEditbox() {
 	GUI_Element* f = focusedElement;
 	if (f != nullptr && f->isEditbox()) {
 		((GUI_Editbox*)f)->cancel();
 	}
 }
 
-void GUI::clearFocus() {
+void GUIEngine::clearFocus() {
 	std::lock_guard <std::mutex> guard(focus_related_mutex);
 	focusedElement = nullptr;
-	_InputEngine->StopTextInput();
+	InputEngine::getInstance().StopTextInput();
 }
 
-void GUI::beginNewFrame() {
+void GUIEngine::beginNewFrame() {
 
 	std::lock_guard <std::mutex> guard(update_mutex);
 	if (elementActions.size() == 0)
@@ -79,7 +76,7 @@ void GUI::beginNewFrame() {
 
 	for (int i = 0; i < elementActions.size(); i++) {		//handle easy actions
 		if (elementActions[i].action == GuiAction::REMOVE_FOCUS) {
-			_GameEngine->_GuiListener(elementActions[i].element, elementActions[i].action);
+			GameEngine::getInstance()._GuiListener(elementActions[i].element, elementActions[i].action);
 			elementActions[i].element->applyAction(GuiAction::REMOVE_FOCUS);
 			std::lock_guard <std::mutex> guard(focus_related_mutex);
 			focusedElement = nullptr;
@@ -87,7 +84,7 @@ void GUI::beginNewFrame() {
 			--i;
 		}
 		else if (elementActions[i].action == GuiAction::MOUSE_MOVED_OUT) {
-			_GameEngine->_GuiListener(elementActions[i].element, elementActions[i].action);
+			GameEngine::getInstance()._GuiListener(elementActions[i].element, elementActions[i].action);
 			elementActions.erase(elementActions.begin() + i);
 			--i;
 		}
@@ -108,13 +105,13 @@ void GUI::beginNewFrame() {
 				focusedElement = elementActions[i].element;
 			}
 			elementActions[i].element->applyAction(elementActions[i].action);
-			_GameEngine->_GuiListener(elementActions[i].element, elementActions[i].action);
+			GameEngine::getInstance()._GuiListener(elementActions[i].element, elementActions[i].action);
 			
 		}
 		else {		//all other actions are denied
 			if (elementActions[i].action != GuiAction::MOUSE_MOVED_OVER) {
 				elementActions[i].element->applyAction(GuiAction::MOUSE_MOVED_OUT);
-				_GameEngine->_GuiListener(elementActions[i].element, GuiAction::MOUSE_MOVED_OUT);
+				GameEngine::getInstance()._GuiListener(elementActions[i].element, GuiAction::MOUSE_MOVED_OUT);
 			}
 		}
 	}

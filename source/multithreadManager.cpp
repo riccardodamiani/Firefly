@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "multithreadManager.h"
 #include "threadHelper.h"
 #include <mutex>

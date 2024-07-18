@@ -3,6 +3,7 @@
 
 //class of gui element: droplist
 #include "gui_panel.h"
+#include "entity.h"
 
 class GUI_Droplist : public GUI_Element {
 public:

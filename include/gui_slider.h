@@ -2,6 +2,7 @@
 #define GUI_SLIDER_H
 
 #include "gameEngine.h"
+#include "entity.h"
 class AnimatedSprite;
 
 class GUI_Slider : public GUI_Element {

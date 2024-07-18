@@ -5,6 +5,7 @@
 #include "gui.h"
 #include "input.h"
 #include "multithreadManager.h"
+#include "entity.h"
 
 #include <vector>
 #include <mutex>
@@ -77,8 +78,15 @@ class GameEngine {
 		int threads;
 	};
 public:
-	GameEngine();
-	void GameEngine_Start(void);
+    static GameEngine& getInstance() {
+        static GameEngine instance;
+        return instance;
+    }
+
+    GameEngine(const GameEngine&) = delete;
+    GameEngine& operator=(const GameEngine&) = delete;
+
+	void GameEngine_Start(GraphicsOptions& g_options, AudioOptions& a_options);
 
 	uint32_t posToZone(vector2 pos);
 	int zoneDistance(uint32_t zone1, uint32_t zone2);
@@ -114,6 +122,10 @@ public:
 	//internal use
 	void _GuiListener(GUI_Element* element, GuiAction action);
 private:
+	GameEngine() = default;
+	~GameEngine() = default;
+
+	Init_Engines(GraphicsOptions& g_options, AudioOptions& a_options);
 	void mainThread();
 	void gameThread();
 

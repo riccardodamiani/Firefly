@@ -1,9 +1,10 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "graphics.h"
 #include "structures.h"
 #include "gameEngine.h"
 #include "camera.h"
 #include "lightObject.h"
+#include "game_options.h"
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -17,35 +18,15 @@ namespace fs = std::filesystem;
 
 #define MAX_LAYER 50
 
-Graphics::Graphics() {
+GraphicsEngine::GraphicsEngine() {
 
-	_updateQueue = _TextureQueues[0];
-	_waitingQueue = _TextureQueues[1];
-	_renderQueue = _TextureQueues[2];
-	_updateCamera = &_CameraTransforms[0];
-	_waitingCamera = &_CameraTransforms[1];
-	_renderCamera = &_CameraTransforms[2];
-	_renderCamera->present = false;
-	_updateCamera->present = false;
-	_lightingOverlay = nullptr;
-	enableRenderDepth =false;
-
-	enableSceneLighting = false;
-	max_lighting_layer = 10;
-	
-	ResolveWindowMode(MODE_FULLSCREEN, 0, 0);		//set the dimension of the screen
-
-	_window = SDL_CreateWindow("", 0, 0, this->windowWidth, this->windowHeight, 0);
-	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-
-	SetLightingQuality_Internal(LightingQuality::LOW_QUALITY);
-	SDL_SetRenderDrawBlendMode(this->_renderer, SDL_BLENDMODE_BLEND);
-	this->_activeLayers = 8;
-	this->_backgroundColor = { 0, 0, 0, 0 };
 }
 
-Graphics::Graphics(int mode, int width, int height, int active_layers) {
-	
+GraphicsEngine::~GraphicsEngine() {
+
+}
+
+void GraphicsEngine::Init(GraphicsOptions &options){
 	_updateQueue = _TextureQueues[0];
 	_waitingQueue = _TextureQueues[1];
 	_renderQueue = _TextureQueues[2];
@@ -60,7 +41,7 @@ Graphics::Graphics(int mode, int width, int height, int active_layers) {
 	enableSceneLighting = false;
 	max_lighting_layer = 10;
 	
-	ResolveWindowMode(mode, width, height);		//set the dimension of the screen
+	ResolveWindowMode(options.mode, options.width, options.height);		//set the dimension of the screen
 
 	_window = SDL_CreateWindow("", 0, 0, this->windowWidth, this->windowHeight, 0);
 	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
@@ -68,19 +49,18 @@ Graphics::Graphics(int mode, int width, int height, int active_layers) {
 	SetLightingQuality_Internal(LightingQuality::LOW_QUALITY);
 	SDL_SetWindowPosition(this->_window, 0, (mode == MODE_FULLSCREEN) ? 0 : 25);
 	SDL_SetRenderDrawBlendMode(this->_renderer, SDL_BLENDMODE_BLEND);
-	SetActiveLayers(active_layers);
-
+	SetActiveLayers(options.activeLayers);
 }
 
 //Enable the pseudo-3d rendering. Objects of the same layer are printed based on their
 //y position. Higher objects are considered farther away so are printed first.
 //Enabling this option can have a impact on framerate
-void Graphics::EnableRenderingDepth(bool enable) {
+void GraphicsEngine::EnableRenderingDepth(bool enable) {
 	enableRenderDepth = enable;
 }
 
 //only called from the main thread so it doesn't need a mutex
-std::pair <bool, int> Graphics::FindTexture(EntityName texName) {
+std::pair <bool, int> GraphicsEngine::FindTexture(EntityName texName) {
 	int lower = 0;
 	int upper = _textures.size() - 1;
 	int mid = lower + (upper - lower + 1) / 2;
@@ -101,26 +81,26 @@ std::pair <bool, int> Graphics::FindTexture(EntityName texName) {
 	return { false, mid };
 }
 
-void Graphics::EnableSceneLighting(bool enable, unsigned int maxLayer) {
+void GraphicsEngine::EnableSceneLighting(bool enable, unsigned int maxLayer) {
 	enableSceneLighting = enable;
 	max_lighting_layer = maxLayer;
 }
 
-void Graphics::SetMaxLightingLayer(unsigned int layer) {
+void GraphicsEngine::SetMaxLightingLayer(unsigned int layer) {
 	max_lighting_layer = layer;
 }
 
 //calculate a parabola equation coefficient from three points.
 //This parabola is used to aproximate light decay due to distance instead of the inverse square law since
 //the last one goes to 0 at infinity which is bad for calculation
-void Graphics::Calculate_Parabola_Coeff_From_Points(double x1, double y1, double x2, double y2, double x3, double y3, double& A, double& B, double& C) {
+void GraphicsEngine::Calculate_Parabola_Coeff_From_Points(double x1, double y1, double x2, double y2, double x3, double y3, double& A, double& B, double& C) {
 	double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
 	A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
 	B = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
 	C = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 }
 
-void Graphics::SetLightingQuality(LightingQuality quality) {
+void GraphicsEngine::SetLightingQuality(LightingQuality quality) {
 
 	std::lock_guard <std::mutex> guard(request_mutex);
 
@@ -132,7 +112,7 @@ void Graphics::SetLightingQuality(LightingQuality quality) {
 }
 
 //set the mode of the screen (fullscreen of window) and the size of the screen
-void Graphics::ResolveWindowMode(int mode, int width, int height) {
+void GraphicsEngine::ResolveWindowMode(int mode, int width, int height) {
 
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
 	SDL_DisplayMode DM = { SDL_PIXELFORMAT_BGRA8888 , 1920, 1080, 50, 0 };
@@ -158,7 +138,7 @@ void Graphics::ResolveWindowMode(int mode, int width, int height) {
 }
 
 //resize the current window
-void Graphics::SetWindow(int mode, int width, int height) {
+void GraphicsEngine::SetWindow(int mode, int width, int height) {
 
 	std::lock_guard <std::mutex> guard(request_mutex);
 	WindowUpdate* data = new WindowUpdate();
@@ -169,7 +149,7 @@ void Graphics::SetWindow(int mode, int width, int height) {
 	this->_requests.push_back(request);
 	
 }
-void Graphics::SetWindow_Internal(int mode, int width, int height) {
+void GraphicsEngine::SetWindow_Internal(int mode, int width, int height) {
 	this->ResolveWindowMode(mode, width, height);
 
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
@@ -177,23 +157,23 @@ void Graphics::SetWindow_Internal(int mode, int width, int height) {
 	SDL_SetWindowPosition(this->_window, 0, (mode == MODE_FULLSCREEN) ? 0 : 25);
 }
 
-int Graphics::GetWindowMode() {
+int GraphicsEngine::GetWindowMode() {
 	return this->_windowMode;
 }
 
-Graphics::~Graphics() {
+GraphicsEngine::~GraphicsEngine() {
 	SDL_DestroyWindow(this->_window);
 }
 
 //this function could return slight a wrong queue size
-unsigned long Graphics::GetTaskQueueLen() {
+unsigned long GraphicsEngine::GetTaskQueueLen() {
 	return _requests.size();
 }
 
 
 //handles the requests regarding graphics for a maximum amount of time
 //after which the mainThread needs to start the next frame. Runs on the main thread
-void Graphics::PollRequests(double tick_tock_motherfucker) {
+void GraphicsEngine::PollRequests(double tick_tock_motherfucker) {
 	int block = 0;
 	auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -324,11 +304,11 @@ void Graphics::PollRequests(double tick_tock_motherfucker) {
 
 //add a texture to the stack
 //is called only from PollRequests which rns on the main thread
-void Graphics::PushTexture(TextureData* texture) {
+void GraphicsEngine::PushTexture(TextureData* texture) {
 
 	//std::lock_guard<std::mutex> guard(update_image_vect_mutex);
 	if (texture->textureName == 0) {
-		texture->textureName = _GameEngine->GenerateRandomName();
+		texture->textureName = GameEngine::getInstance().GenerateRandomName();
 	}
 	auto [found, index] = FindTexture(texture->textureName);
 	if (found) {
@@ -339,7 +319,7 @@ void Graphics::PushTexture(TextureData* texture) {
 }
 
 //only runs on the main thread. Doesn't need a mutex
-SDL_Surface* Graphics::CreateSurface(int width, int height) {
+SDL_Surface* GraphicsEngine::CreateSurface(int width, int height) {
 	/* Create a 32-bit surface with the bytes of each pixel in R,G,B,A order,
 	   as expected by OpenGL for textures */
 	SDL_Surface* surface;
@@ -367,13 +347,13 @@ SDL_Surface* Graphics::CreateSurface(int width, int height) {
 //create a curstomized texture appling the filter to each pixel of the image.
 //filter is a function witch receive 3 parameters: x and y of the pixel and a pointer to a already created color structure. 
 //x and y are calculated from the center of the texture
-void Graphics::CreateCustomTexture(int width, int height, void (*filter)(CustomFilterData& data), EntityName name, void* args) {
+void GraphicsEngine::CreateCustomTexture(int width, int height, void (*filter)(CustomFilterData& data), EntityName name, void* args) {
 	
 	if (filter == nullptr)
 		return;
 
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 	TextureCreation* data = new TextureCreation();
 	data->processType = 0;
@@ -388,9 +368,9 @@ void Graphics::CreateCustomTexture(int width, int height, void (*filter)(CustomF
 
 
 //create a texture of a circle
-void Graphics::CreateCircleTexture(SDL_Color& color, int radius, bool fill, EntityName name) {
+void GraphicsEngine::CreateCircleTexture(SDL_Color& color, int radius, bool fill, EntityName name) {
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 	TextureCreation* data = new TextureCreation();
 	data->processType = 1;
@@ -403,10 +383,10 @@ void Graphics::CreateCircleTexture(SDL_Color& color, int radius, bool fill, Enti
 }
 
 //create a texture of a solid rectangle and returns the id of the texture
-void Graphics::CreateRectangleTexture(SDL_Color& color, int width, int height, bool fill, EntityName name) {
+void GraphicsEngine::CreateRectangleTexture(SDL_Color& color, int width, int height, bool fill, EntityName name) {
 
 	if (name == 0) {
-		name = _GameEngine->GenerateRandomName();
+		name = GameEngine::getInstance().GenerateRandomName();
 	}
 	TextureCreation* data = new TextureCreation();
 	data->processType = 2;
@@ -420,7 +400,7 @@ void Graphics::CreateRectangleTexture(SDL_Color& color, int width, int height, b
 
 }
 
-void Graphics::CreateRectangleTexture_Internal(SDL_Color& color, int width, int height, bool fill, EntityName name) {
+void GraphicsEngine::CreateRectangleTexture_Internal(SDL_Color& color, int width, int height, bool fill, EntityName name) {
 	SDL_Surface* surface = this->CreateSurface(width, height);
 	DrawRectangleInSurface(surface, &color, width, height, fill);
 
@@ -434,7 +414,7 @@ void Graphics::CreateRectangleTexture_Internal(SDL_Color& color, int width, int 
 }
 
 
-void Graphics::CreateCircleTexture_Internal(SDL_Color& color, int radius, bool fill, EntityName name) {
+void GraphicsEngine::CreateCircleTexture_Internal(SDL_Color& color, int radius, bool fill, EntityName name) {
 	SDL_Surface* surface = this->CreateSurface(radius * 2 + 1, radius * 2 + 1);
 	//there is no need to lock the surface since it will never leave this scope
 
@@ -450,7 +430,7 @@ void Graphics::CreateCircleTexture_Internal(SDL_Color& color, int radius, bool f
 }
 
 
-void Graphics::CreateCustomTexture_Internal(int width, int height, void (*filter)(CustomFilterData& data), EntityName name, void* args) {
+void GraphicsEngine::CreateCustomTexture_Internal(int width, int height, void (*filter)(CustomFilterData& data), EntityName name, void* args) {
 	
 	SDL_Surface* surface = this->CreateSurface(width, height);
 	DrawCustomSurface(surface, width, height, filter, args);
@@ -468,7 +448,7 @@ void Graphics::CreateCustomTexture_Internal(int width, int height, void (*filter
 //draw a custom texture with a pattern defined by the function filter
 //filter is a function witch receive 3 parameters: x and y of the pixel and a pointer to a already created color structure. 
 //x and y are calculated from the center of the texture
-void Graphics::DrawCustomSurface(SDL_Surface* surface, int width, int height, void (*filter)(CustomFilterData& data), void* args) {
+void GraphicsEngine::DrawCustomSurface(SDL_Surface* surface, int width, int height, void (*filter)(CustomFilterData& data), void* args) {
 	if (filter == nullptr)
 		return;
 
@@ -498,7 +478,7 @@ void Graphics::DrawCustomSurface(SDL_Surface* surface, int width, int height, vo
 
 //draw a light surface
 //this function is run in parallel in a different thread that the main one
-void Graphics::DrawLightSurface(LightTextureBakeData *lightBakeData, int width, int height, 
+void GraphicsEngine::DrawLightSurface(LightTextureBakeData *lightBakeData, int width, int height, 
 	void (*filter)(CustomFilterData& data)) {
 	if (filter == nullptr || lightBakeData->surface == nullptr) {
 		lightBakeData->done = true;
@@ -533,7 +513,7 @@ void Graphics::DrawLightSurface(LightTextureBakeData *lightBakeData, int width, 
 
 
 
-void Graphics::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *color, int width, int height, bool fill)
+void GraphicsEngine::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *color, int width, int height, bool fill)
 {
 	SDL_LockSurface(surface);
 	memset(surface->pixels, 0, surface->pitch * surface->h);
@@ -561,7 +541,7 @@ void Graphics::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *color, in
 	SDL_UnlockSurface(surface);
 }
 
-void Graphics::DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int radius, bool fill) {
+void GraphicsEngine::DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int radius, bool fill) {
 
 	SDL_LockSurface(surface);
 	memset(surface->pixels, 0, surface->pitch * surface->h);
@@ -619,7 +599,7 @@ void Graphics::DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int r
 	SDL_UnlockSurface(surface);
 }
 
-void Graphics::drawPointInSurface(SDL_Surface* surface, SDL_Color& color, int x, int y) {
+void GraphicsEngine::drawPointInSurface(SDL_Surface* surface, SDL_Color& color, int x, int y) {
 	//no need to lock the surface since this function is only used when the surface is already locked
 	Uint8* target_pixel = (Uint8*)surface->pixels + y * surface->pitch + x * 4;
 	*target_pixel = color.r;
@@ -630,7 +610,7 @@ void Graphics::drawPointInSurface(SDL_Surface* surface, SDL_Color& color, int x,
 }
 
 //request to set the window title
-void Graphics::SetWindowTitle(std::string title) {
+void GraphicsEngine::SetWindowTitle(std::string title) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	WindowUpdate* data = new WindowUpdate();
 	data->title = title;
@@ -638,11 +618,11 @@ void Graphics::SetWindowTitle(std::string title) {
 	this->_requests.push_back(request);
 }
 
-void Graphics::SetWindowTitle_Internal(std::string title) {
+void GraphicsEngine::SetWindowTitle_Internal(std::string title) {
 	SDL_SetWindowTitle(this->_window, title.c_str());
 }
 
-void Graphics::LoadTextureFromFile(std::string& pathName, std::string& filename, EntityName groupName) {
+void GraphicsEngine::LoadTextureFromFile(std::string& pathName, std::string& filename, EntityName groupName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	LoadFileStruct* data = new LoadFileStruct();
 	data->pathName = pathName;
@@ -652,7 +632,7 @@ void Graphics::LoadTextureFromFile(std::string& pathName, std::string& filename,
 	this->_requests.push_back(request);
 }
 
-void Graphics::LoadTextureFromFile_Internal(std::string& pathName, std::string& filename, EntityName groupName) {
+void GraphicsEngine::LoadTextureFromFile_Internal(std::string& pathName, std::string& filename, EntityName groupName) {
 	//load the image
 	SDL_Surface* sourceSurface = IMG_Load(pathName.c_str());
 
@@ -674,21 +654,21 @@ void Graphics::LoadTextureFromFile_Internal(std::string& pathName, std::string& 
 }
 
 
-void Graphics::LoadTextureGroup(const char *groupName) {
+void GraphicsEngine::LoadTextureGroup(const char *groupName) {
 	if (groupName == nullptr)
 		return;
 	std::string str_textureGroup = groupName;
 	EntityName groupCode = DecodeName(groupName);
 #ifdef _WIN32
-	std::string folder = "Data\\Graphics\\" + str_textureGroup;
+	std::string folder = "Data\\GraphicsEngine\\" + str_textureGroup;
 #else
-	std::string folder = "Data/Graphics/" + groupName;
+	std::string folder = "Data/GraphicsEngine/" + groupName;
 #endif
 	LoadFromDir(folder, groupCode);
 }
 
 
-void Graphics::UnloadTextureGroup(EntityName groupName) {
+void GraphicsEngine::UnloadTextureGroup(EntityName groupName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	DestroyTextureGroup* data = new DestroyTextureGroup();
 	data->textureGroup = groupName;
@@ -697,7 +677,7 @@ void Graphics::UnloadTextureGroup(EntityName groupName) {
 	
 }
 
-void Graphics::UnloadTextureGroup_Internal(EntityName groupName) {
+void GraphicsEngine::UnloadTextureGroup_Internal(EntityName groupName) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	for (int i = 0; i < _textures.size(); i++) {
 		TextureData tData = this->_textures[i];
@@ -711,13 +691,13 @@ void Graphics::UnloadTextureGroup_Internal(EntityName groupName) {
 }
 
 
-void Graphics::UnloadAllGraphics() {
+void GraphicsEngine::UnloadAllGraphics() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	std::pair < GraphicRequestType, void*> request(GraphicRequestType::FREE_ALL, nullptr);
 	this->_requests.push_back(request);
 }
 
-void Graphics::UnloadAllGraphics_Internal() {
+void GraphicsEngine::UnloadAllGraphics_Internal() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	for (int i = 0; i < _textures.size(); i++) {
 		TextureToDestroy* data = new TextureToDestroy();
@@ -728,7 +708,7 @@ void Graphics::UnloadAllGraphics_Internal() {
 }
 
 
-void Graphics::BakeLightTexture(LightObjectData lightData) {
+void GraphicsEngine::BakeLightTexture(LightObjectData lightData) {
 
 	std::lock_guard <std::mutex> guard(request_mutex);
 	LightObjectData* data = new LightObjectData();
@@ -739,7 +719,7 @@ void Graphics::BakeLightTexture(LightObjectData lightData) {
 }
 
 
-void Graphics::CompleteLightBaking() {
+void GraphicsEngine::CompleteLightBaking() {
 	for (auto it = _lightBakingTasks.begin(); it != _lightBakingTasks.end();) {
 		if ((*it)->done) {
 			CompleteBakingLightTexture_Internal(*it);
@@ -752,11 +732,11 @@ void Graphics::CompleteLightBaking() {
 }
 
 //starts the new thread that draw the surface of the light texture
-void Graphics::BakeLightTexture_Internal(LightObjectData& lightData) {
+void GraphicsEngine::BakeLightTexture_Internal(LightObjectData& lightData) {
 
 	if (lightData.type == LightType::POINT_LIGHT) {
 
-		//_GameEngine->FindGameObject(DecodeName("MainCamera"));
+		//GameEngine::getInstance().FindGameObject(DecodeName("MainCamera"));
 		
 		SDL_Surface* surface = this->CreateSurface(_lightingOverlaySize.x, _lightingOverlaySize.x);
 		//DrawCustomSurface(surface, _lightingOverlaySize.x, _lightingOverlaySize.x, PointLightFilter, &lightData);
@@ -799,7 +779,7 @@ void Graphics::BakeLightTexture_Internal(LightObjectData& lightData) {
 }
 
 //transforms the light object surface into a texture and pushes it into the texture list
-void Graphics::CompleteBakingLightTexture_Internal(LightTextureBakeData* lightData) {
+void GraphicsEngine::CompleteBakingLightTexture_Internal(LightTextureBakeData* lightData) {
 	if (lightData->surface == nullptr)
 		return;
 
@@ -828,14 +808,14 @@ void Graphics::CompleteBakingLightTexture_Internal(LightTextureBakeData* lightDa
 }
 
 //create a task in the queue to stop alla light baking
-void Graphics::KillLightBaking() {
+void GraphicsEngine::KillLightBaking() {
 	std::lock_guard <std::mutex> guard(request_mutex);
 
 	std::pair < GraphicRequestType, void*> request(GraphicRequestType::KILL_LIGHT_BAKING, nullptr);
 	this->_requests.push_back(request);
 }
 
-void Graphics::KillLightBaking_Internal() {
+void GraphicsEngine::KillLightBaking_Internal() {
 	for (auto it = _lightBakingTasks.begin(); it != _lightBakingTasks.end(); it++) {
 		(*it)->abort = true;
 		while (!(*it)->done);	//waits the thread to finish
@@ -845,7 +825,7 @@ void Graphics::KillLightBaking_Internal() {
 	_lightBakingTasks.clear();
 }
 
-void Graphics::DestroyTexture(EntityName name) {
+void GraphicsEngine::DestroyTexture(EntityName name) {
 	std::lock_guard <std::mutex> guard(request_mutex);
 	TextureToDestroy* data = new TextureToDestroy();
 	data->name = name;
@@ -855,7 +835,7 @@ void Graphics::DestroyTexture(EntityName name) {
 
 //destroy a texture by name
 //it's called from PollRequests that runs on the main thread
-void Graphics::DestroyTexture_Internal(EntityName name) {
+void GraphicsEngine::DestroyTexture_Internal(EntityName name) {
 
 	auto [found, texIndex] = FindTexture(name);
 	if (found) {
@@ -864,7 +844,7 @@ void Graphics::DestroyTexture_Internal(EntityName name) {
 	}
 }
 
-void Graphics::SetLightingQuality_Internal(LightingQuality quality) {
+void GraphicsEngine::SetLightingQuality_Internal(LightingQuality quality) {
 	if (_lightingOverlay != nullptr)
 		SDL_DestroyTexture(_lightingOverlay);
 
@@ -894,7 +874,7 @@ void Graphics::SetLightingQuality_Internal(LightingQuality quality) {
 }
 
 
-void Graphics::LoadFromDir(std::string directory, EntityName groupName) {
+void GraphicsEngine::LoadFromDir(std::string directory, EntityName groupName) {
 
 	try {
 		for (auto& dirEntry : fs::recursive_directory_iterator(directory)) {
@@ -929,7 +909,7 @@ void Graphics::LoadFromDir(std::string directory, EntityName groupName) {
 
 
 //save the state of a texture that needs to be printed on screen
-void Graphics::BlitSurface(EntityName textureName, int screenLayer, vector2 pos, vector2 scale, double rot, TextureFlip flip) {
+void GraphicsEngine::BlitSurface(EntityName textureName, int screenLayer, vector2 pos, vector2 scale, double rot, TextureFlip flip) {
 	if (textureName == 0)
 		return;
 	
@@ -949,7 +929,7 @@ void Graphics::BlitSurface(EntityName textureName, int screenLayer, vector2 pos,
 
 }
 
-void Graphics::BlitTextSurface(EntityName fontAtlas, std::string text, int layer, vector2 pos, vector2 scale, double rot, TextureFlip flip, int cursorPos) {
+void GraphicsEngine::BlitTextSurface(EntityName fontAtlas, std::string text, int layer, vector2 pos, vector2 scale, double rot, TextureFlip flip, int cursorPos) {
 	//update_queue_mutex.lock();
 
 	if (_fontsRef.find(fontAtlas) == _fontsRef.end()) {
@@ -981,7 +961,7 @@ void Graphics::BlitTextSurface(EntityName fontAtlas, std::string text, int layer
 		//print the cursor
 		if (cursorPos == i) {
 			vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
-			_graphicsEngine->BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
+			GraphicsEngine::getInstance().BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
 		}
 
 		//print the letter
@@ -989,27 +969,27 @@ void Graphics::BlitTextSurface(EntityName fontAtlas, std::string text, int layer
 		vector2 size = { letterScale * availableY, availableY };
 		delta.x += size.x / 2;
 		vector2 letterPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
-		_graphicsEngine->BlitSurface(name, layer, letterPos, size, rot, TextureFlip::FLIP_NONE);
+		GraphicsEngine::getInstance().BlitSurface(name, layer, letterPos, size, rot, TextureFlip::FLIP_NONE);
 
 		delta.x += size.x / 2;
 	}
 	//print the cursor
 	if (cursorPos == i) {
 		vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
-		_graphicsEngine->BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
+		GraphicsEngine::getInstance().BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
 	}
 }
 
 
-void Graphics::SetBackgroundColor(SDL_Color& color) {
+void GraphicsEngine::SetBackgroundColor(SDL_Color& color) {
 	this->_backgroundColor = color;
 }
 
-bool Graphics::compareY(TextureObj &i1, TextureObj &i2) {
+bool GraphicsEngine::compareY(TextureObj &i1, TextureObj &i2) {
 	return (i1.pos.y - i1.scale.y/2.0 > i2.pos.y - i2.scale.y/2.0);
 }
 
-vector2 Graphics::screenToSpace(int x_coord, int y_coord) {
+vector2 GraphicsEngine::screenToSpace(int x_coord, int y_coord) {
 	vector2 cPos = _cameraPos;
 	vector2 s_s_scale = spaceToScreenScale;
 	vector2 spacePos = { cPos.x + (double)(x_coord - this->windowWidth/2) / s_s_scale.x,
@@ -1018,7 +998,7 @@ vector2 Graphics::screenToSpace(int x_coord, int y_coord) {
 	return spacePos;
 }
 
-void Graphics::updateRenderCamera(bool present, vector2 pos, vector2 scale, double rotation) {
+void GraphicsEngine::updateRenderCamera(bool present, vector2 pos, vector2 scale, double rotation) {
 	_updateCamera->present = present;
 	_updateCamera->pos = pos;
 	_updateCamera->rot = rotation;
@@ -1026,7 +1006,7 @@ void Graphics::updateRenderCamera(bool present, vector2 pos, vector2 scale, doub
 }
 
 //swap the screen buffers. It's called from the main thread
-/*void Graphics::SwapScreenBuffers() {
+/*void GraphicsEngine::SwapScreenBuffers() {
 	//swap the two texture queues
 
 	//Very last protection to avoid swapping the buffers while the main thread is rendering
@@ -1048,7 +1028,7 @@ void Graphics::updateRenderCamera(bool present, vector2 pos, vector2 scale, doub
 	}
 }*/
 
-void Graphics::SwapScreenBuffersPhysics() {
+void GraphicsEngine::SwapScreenBuffersPhysics() {
 	std::lock_guard <std::mutex> swap_buffer_guard(swap_buffer_mutex);
 
 	std::vector <textureObject>* temp = _waitingQueue;
@@ -1064,7 +1044,7 @@ void Graphics::SwapScreenBuffersPhysics() {
 }
 
 
-void Graphics::SwapScreenBuffersGraphics() {
+void GraphicsEngine::SwapScreenBuffersGraphics() {
 	std::lock_guard <std::mutex> swap_buffer_guard(swap_buffer_mutex);
 
 	std::vector <textureObject>* temp = _waitingQueue;
@@ -1079,7 +1059,7 @@ void Graphics::SwapScreenBuffersGraphics() {
 
 //draws all the textures on the window
 //It's called from the main thread
-void Graphics::Flip() {
+void GraphicsEngine::Flip() {
 
 	//Very last protection to avoid swapping the buffers while the main thread is rendering
 	//This mutex should avoid crashing when the main thread renders much quicker that the draw thread
@@ -1150,9 +1130,9 @@ void Graphics::Flip() {
 	SDL_RenderPresent(this->_renderer);
 }
 
-void Graphics::DrawLighting(vector2 cameraPos, vector2 cameraScale, double cameraRot) {
+void GraphicsEngine::DrawLighting(vector2 cameraPos, vector2 cameraScale, double cameraRot) {
 
-	std::vector <LightObject*>* lights = _GameEngine->GetLightObjects();
+	std::vector <LightObject*>* lights = GameEngine::getInstance().GetLightObjects();
 	std::vector < LightObject*>& ref = *lights;
 	if (ref.size() == 0)
 		return;
@@ -1245,7 +1225,7 @@ void Graphics::DrawLighting(vector2 cameraPos, vector2 cameraScale, double camer
 //Redraw only the color of a light texture without touching the alpha channel
 //This is called directly from the flip() function since the color change is
 //done using the SDL_RenderFillRect which is really fast
-void Graphics::BakeLightColor(LightObjectData& data) {
+void GraphicsEngine::BakeLightColor(LightObjectData& data) {
 	SDL_BlendMode colorMode = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE,
 		SDL_BLENDFACTOR_ZERO,
 		SDL_BLENDOPERATION_ADD,
@@ -1277,7 +1257,7 @@ void Graphics::BakeLightColor(LightObjectData& data) {
 //For low light intensity (0.0-2.0) the increase in pixel luminosity is linear, 
 //but the higher the intensity is and the less the luminosity increase.
 //Ideally you get maximum luminosity for intensity -> infinity
-void Graphics::PointLightFilter(CustomFilterData &data) {
+void GraphicsEngine::PointLightFilter(CustomFilterData &data) {
 
 	LightObjectData* lightdata = (LightObjectData*)data.args;
 	double scale = data.textureWidth / (lightdata->lightRadius * 2.0);
@@ -1312,7 +1292,7 @@ void Graphics::PointLightFilter(CustomFilterData &data) {
 	data.pixelColor.a = 255.0 * (1.0 - pow(2.0, -log(1 + intensity * intensity)));	//hdr-ish algorithm
 }
 
-vector2 Graphics::Internal_GetTextureSize(SDL_Texture* texture) {
+vector2 GraphicsEngine::Internal_GetTextureSize(SDL_Texture* texture) {
 	int w, h;
 
 	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
@@ -1321,7 +1301,7 @@ vector2 Graphics::Internal_GetTextureSize(SDL_Texture* texture) {
 
 
 //scale a surface to the width and height specified
-SDL_Surface* Graphics::ScaleSurface(SDL_Surface *Surface, int Width, int Height)
+SDL_Surface* GraphicsEngine::ScaleSurface(SDL_Surface *Surface, int Width, int Height)
 {
 	int bytesNum = Surface->format->BitsPerPixel/8;
 
@@ -1344,7 +1324,7 @@ SDL_Surface* Graphics::ScaleSurface(SDL_Surface *Surface, int Width, int Height)
 	return _ret;
 }
 
-void Graphics::drawPixel(SDL_Surface *surface, int x, int y, Uint32 pixel, int bytesNum){
+void GraphicsEngine::drawPixel(SDL_Surface *surface, int x, int y, Uint32 pixel, int bytesNum){
 
 	Uint8 *target_pixel = (Uint8 *)surface->pixels + y * surface->w * bytesNum + x * bytesNum;
 	Uint8 *pixel8 = (Uint8*)&pixel;
@@ -1353,7 +1333,7 @@ void Graphics::drawPixel(SDL_Surface *surface, int x, int y, Uint32 pixel, int b
 	}
 }
 
-Uint32 Graphics::readPixel(SDL_Surface *surface, int x, int y, int bytesNum){
+Uint32 GraphicsEngine::readPixel(SDL_Surface *surface, int x, int y, int bytesNum){
 
 	Uint8 *pixels = (Uint8 *)surface->pixels;
 	Uint32 *pixel32 = 0;
@@ -1362,21 +1342,21 @@ Uint32 Graphics::readPixel(SDL_Surface *surface, int x, int y, int bytesNum){
 }
 
 //return the width of the window
-std::pair <int, int> Graphics::GetWindowSize() {
+std::pair <int, int> GraphicsEngine::GetWindowSize() {
 	return { this->windowWidth, this->windowHeight };
 }
 
 //draw a line between point 1 and 2
-void Graphics::drawLine(int x1, int y1, int x2, int y2,int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
+void GraphicsEngine::drawLine(int x1, int y1, int x2, int y2,int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
 	SDL_SetRenderDrawColor(this->_renderer, R, G, B, A);
 	SDL_RenderDrawLine(this->_renderer, x1, y1, x2, y2);
 }
 
-void Graphics::setRendererScale(double xScale, double yScale) {
+void GraphicsEngine::setRendererScale(double xScale, double yScale) {
 	SDL_RenderSetScale(this->_renderer, xScale, yScale);
 }
 
-void Graphics::drawCircle(vector2 center, int32_t radius, bool fill){	
+void GraphicsEngine::drawCircle(vector2 center, int32_t radius, bool fill){	
 	int32_t centerX = center.x;
 	int32_t centerY = center.y;
 	const int32_t diameter = (radius * 2);
@@ -1429,7 +1409,7 @@ void Graphics::drawCircle(vector2 center, int32_t radius, bool fill){
 	
 }
 
-void Graphics::drawEllipse(vector2 center, int32_t a, int32_t b){
+void GraphicsEngine::drawEllipse(vector2 center, int32_t a, int32_t b){
 	int32_t centerX = center.x;
 	int32_t centerY = center.y;
 
@@ -1447,7 +1427,7 @@ void Graphics::drawEllipse(vector2 center, int32_t a, int32_t b){
 	}
 }
 
-void Graphics::CreateTextSurface(EntityName name, std::string text, TTF_Font* font, SDL_Color textColor, SDL_Color backgroundColor, vector2& size) {
+void GraphicsEngine::CreateTextSurface(EntityName name, std::string text, TTF_Font* font, SDL_Color textColor, SDL_Color backgroundColor, vector2& size) {
 
 	//Unfortunately TTF_RenderText_Shaded doesn't seems to work with opengles2 as driver
 	//so i have to manually create the text and the background
@@ -1485,13 +1465,13 @@ void Graphics::CreateTextSurface(EntityName name, std::string text, TTF_Font* fo
 
 //set the number of layers that will be rendered (counted from 0). Higher rendered layers means worse performance. Max: 100 layers
 //This function should be called only inside the contructor of a scene
-void Graphics::SetActiveLayers(int layers) {
+void GraphicsEngine::SetActiveLayers(int layers) {
 	if (layers > 100 || layers < 1)
 		return;
 	this->_activeLayers = layers;
 }
 
-vector2 Graphics::GetTextSize(EntityName atlasName, std::string text, int count, double Y_TextScale) {
+vector2 GraphicsEngine::GetTextSize(EntityName atlasName, std::string text, int count, double Y_TextScale) {
 	font_mutex.lock();
 
 	if (_fontsRef.find(atlasName) == _fontsRef.end()) {
@@ -1522,7 +1502,7 @@ vector2 Graphics::GetTextSize(EntityName atlasName, std::string text, int count,
 
 }
 
-void Graphics::LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
+void GraphicsEngine::LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
 	if (atlasName == 0) {
 		return;
 	}
@@ -1536,7 +1516,7 @@ void Graphics::LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color ba
 	this->_requests.push_back(request);
 }
 
-void Graphics::LoadFontChar_Internal(fontCharCreation* fontCharData) {
+void GraphicsEngine::LoadFontChar_Internal(fontCharCreation* fontCharData) {
 
 	//clear everything when done
 	if (fontCharData->deleteFontObj) {
@@ -1563,7 +1543,7 @@ void Graphics::LoadFontChar_Internal(fontCharCreation* fontCharData) {
 	vec.push_back({ name, size });
 }
 
-void Graphics::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
+void GraphicsEngine::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
 	char character[2] = "";
 	std::string fontCompleteName = "Fonts\\" + fontName + ".ttf";
 
@@ -1604,7 +1584,7 @@ void Graphics::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL
 
 }
 
-bool Graphics::isCharPrint(char c) {
+bool GraphicsEngine::isCharPrint(char c) {
 	int h = (unsigned char)c;
 	if (h >= 32 && h <= 254)
 		return true;

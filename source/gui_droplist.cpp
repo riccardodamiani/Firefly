@@ -1,11 +1,9 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_element.h"
 #include "gui_droplist.h"
 #include "structures.h"
 #include "gui_text.h"
 #include "gameEngine.h"
-
-extern Graphics* const _graphicsEngine;
 
 //constructor
 GUI_Droplist::GUI_Droplist(EntityName objectName, unsigned int elementCode, EntityName mainTexture, EntityName background_texture,
@@ -209,21 +207,21 @@ void GUI_Droplist::update(double timeElapsed) {
 	if (this->_isMouseOn) {
 		vector2 thisPos = transform.position;
 		vector2 thisRect = transform.scale;
-		mousePos = _GameEngine->MousePosition();
+		mousePos = GameEngine::getInstance().MousePosition();
 		if (!(mousePos.x >= thisPos.x - thisRect.x / 2.0 &&	//out of the rectangle
 			mousePos.x <= thisPos.x + thisRect.x / 2.0 &&
 			mousePos.y >= thisPos.y - thisRect.y / 2.0 - ( _status?(panelEntries *transform.scale.y()):0.0 ) &&
 			mousePos.y <= thisPos.y + thisRect.y / 2.0)) {
-			_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
+			GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OUT, this);
 			this->_isMouseOn = false;
 			return;
 		}
 	}
 
 	if (this->_isPressed) {		//droplist is pressed
-		if (_InputEngine->wasMouseButtonReleased(SDL_BUTTON_LEFT)) {		//if the button was released
+		if (InputEngine::getInstance().wasMouseButtonReleased(SDL_BUTTON_LEFT)) {		//if the button was released
 
-			mousePos = _GameEngine->MousePosition();
+			mousePos = GameEngine::getInstance().MousePosition();
 			vector2 thisPos = transform.position;
 			vector2 thisRect = transform.scale;
 
@@ -233,7 +231,7 @@ void GUI_Droplist::update(double timeElapsed) {
 				mousePos.y >= thisPos.y - thisRect.y / 2.0 - (_status ? (panelEntries * transform.scale.y()) : 0.0) &&
 				mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 				this->_isPressed = false;
-				_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_UP, this);
+				GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_UP, this);
 				_mouseClickPosition = mousePos;		//save the position of the click to find the element pressed
 				return;
 			}
@@ -244,9 +242,9 @@ void GUI_Droplist::update(double timeElapsed) {
 		}
 	}
 	else {		//droplist is not pressed
-		if (_InputEngine->wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
+		if (InputEngine::getInstance().wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
 
-			mousePos = _GameEngine->MousePosition();
+			mousePos = GameEngine::getInstance().MousePosition();
 			vector2 thisPos = transform.position;
 			vector2 thisRect = transform.scale;
 
@@ -256,7 +254,7 @@ void GUI_Droplist::update(double timeElapsed) {
 				mousePos.y >= thisPos.y - thisRect.y / 2.0 - (_status ? (panelEntries * transform.scale.y()) : 0.0) &&
 				mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
-				_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
+				GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
 				return;
 			}
 			else {		//if was clicked outside
@@ -267,7 +265,7 @@ void GUI_Droplist::update(double timeElapsed) {
 			}
 		}
 		else {
-			mousePos = _GameEngine->MousePosition();
+			mousePos = GameEngine::getInstance().MousePosition();
 			vector2 thisPos = transform.position;
 			vector2 thisRect = transform.scale;
 
@@ -278,11 +276,11 @@ void GUI_Droplist::update(double timeElapsed) {
 				mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
 				if (this->_isMouseOn) {
-					_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
+					GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_HOVERING, this);
 					return;
 				}
 				else {
-					_GuiEngine->RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
+					GUIEngine::getInstance().RegisterGuiAction(GuiAction::MOUSE_MOVED_OVER, this);
 					return;
 				}
 			}

@@ -13,11 +13,14 @@
 #include "structures.h"
 #include "gameEngine.h"
 #include "lightObject.h"
+#include "entity.h"
 
 //windows modes
-#define MODE_FULLSCREEN 1
-#define MODE_WINDOW_MAX_SIZE 2
-#define MODE_WINDOW 3
+enum WindowMode{
+	MODE_FULLSCREEN = 1,
+	MODE_WINDOW_MAX_SIZE = 2,
+	MODE_WINDOW = 3
+};
 
 enum class TextureFlip
 {
@@ -39,7 +42,7 @@ struct CustomFilterData {
 	void* args;
 };
 
-class Graphics {
+class GraphicsEngine {
 	//some internal structures
 	typedef struct textureObject {
 		EntityName textureName;
@@ -149,9 +152,15 @@ class Graphics {
 	typedef std::vector <TextureObj> buffer_vector[32][50];
 
 public:
-	Graphics();
-	Graphics(int mode, int windowWidth, int windowHeight, int active_layers);
-	~Graphics();
+    static GraphicsEngine& getInstance() {
+        static GraphicsEngine instance;
+        return instance;
+    }
+
+    GraphicsEngine(const GraphicsEngine&) = delete;
+    GraphicsEngine& operator=(const GraphicsEngine&) = delete;
+
+	Init(GraphicsOptions &options);
 
 	//requests that can be processed immediately
 	void Flip();		//renders everything to the screen
@@ -194,6 +203,9 @@ public:
 
 	unsigned long GetTaskQueueLen();
 private:
+	GraphicsEngine() = default;
+	~GraphicsEngine() = default;
+
 	//internal methods for handling specific requests that need SDL calls
 	void SetWindowTitle_Internal(std::string title);
 	void SetWindow_Internal(int mode, int width, int height);

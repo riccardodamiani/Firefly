@@ -29,10 +29,15 @@ typedef struct action {
 	GuiAction action;
 }Action;
 
-class GUI {
+class GUIEngine {
 public:
-	//contructors
-	GUI();
+	static GUIEngine& getInstance() {
+        static GUIEngine instance;
+        return instance;
+    }
+
+    GUIEngine(const GUIEngine&) = delete;
+    GUIEngine& operator=(const GUIEngine&) = delete;
 
 	void incrementCursorInFocusedEditbox();
 	void decrementCursorInFocusedEditbox();
@@ -45,6 +50,8 @@ public:
 	void beginNewFrame();
 	void clearFocus();
 private:
+	GUIEngine() = default;
+	~GUIEngine() = default;
 	std::atomic <GUI_Element*> focusedElement;
 	std::vector <Action> elementActions;
 	std::mutex update_mutex;

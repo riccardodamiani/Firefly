@@ -3,6 +3,8 @@
 
 #include "gui_element.h"
 #include "variables.h"
+#include "entity.h"
+
 #include <mutex>
 class Sprite;
 

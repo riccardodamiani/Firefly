@@ -4,6 +4,7 @@
 #include "gameObject.h"
 #include "structures.h"
 #include "variables.h"
+#include "entity.h"
 
 enum class LightType {
 	POINT_LIGHT,

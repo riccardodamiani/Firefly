@@ -1,6 +1,6 @@
-#include "stdafx.h"
 #include "audio_source.h"
 #include "audio.h"
+#include "entity.h"
 
 #include <memory>
 
@@ -10,10 +10,10 @@ AudioSource::AudioSource(EntityName audioSrcName, std::string trackName, uint16_
 	_maxDistance(maxDistance),
 	_audioGroup(audioGroup)
 {
-	_len = _AudioEngine->GetTrackLen(_trackName);
+	_len = AudioEngine::getInstance().GetTrackLen(_trackName);
 	_status = AudioStatus::AUDIO_STATUS_IDLE;
 	_objectName = audioSrcName;
-	_GameEngine->RegisterGameObject(this, audioSrcName);
+	GameEngine::getInstance().RegisterGameObject(this, audioSrcName);
 	_playTimer = 0;
 	_updateTimer = 0;
 }
@@ -32,28 +32,28 @@ bool AudioSource::Play() {
 		GetStatus() != AUDIO_STATUS_FINISHED) {
 		return false;
 	}
-	_AudioEngine->PlayTrack(_trackName, _audioGroup, _maxDistance, transform.position, _spatial_sound, _objectName);
+	AudioEngine::getInstance().PlayTrack(_trackName, _audioGroup, _maxDistance, transform.position, _spatial_sound, _objectName);
 }
 
 //pause the track
 void AudioSource::Pause() {
-	_AudioEngine->PauseAudioSource(_objectName);
+	AudioEngine::getInstance().PauseAudioSource(_objectName);
 }
 
 //stops the track. You can restart it from the beginning by calling Play()
 void AudioSource::Stop() {
-	_AudioEngine->StopAudioSource(_objectName);
+	AudioEngine::getInstance().StopAudioSource(_objectName);
 }
 
 //resume a paused track
 void AudioSource::Resume() {
-	_AudioEngine->ResumeAudioSource(_objectName);
+	AudioEngine::getInstance().ResumeAudioSource(_objectName);
 }
 
 //return the current status of the track
 AudioStatus AudioSource::GetStatus() {
 	/*if (_status == AudioStatus::AUDIO_STATUS_PLAYING) {	//could be already finished
-		if (!_AudioEngine->AudioSourcePlaying(_channel, _objectName)) {	//already finished
+		if (!AudioEngine::getInstance().AudioSourcePlaying(_channel, _objectName)) {	//already finished
 			_status = AudioStatus::AUDIO_STATUS_FINISHED;
 			return _status;
 		}
@@ -90,7 +90,7 @@ void AudioSource::update(double timeElapsed) {
 			_playTimer = 0;
 		}
 		if(_spatial_sound)
-			_AudioEngine->updateAudioSource(getObjectName(), _channel, transform.position, _maxDistance, _audioGroup);
+			AudioEngine::getInstance().updateAudioSource(getObjectName(), _channel, transform.position, _maxDistance, _audioGroup);
 		_updateTimer = 0;
 	}
 }

@@ -7,9 +7,11 @@
 #include <atomic>
 #include "gameEngine.h"
 #include <memory>
-#include "audio_source.h"
 
-class Audio {
+#include "audio_source.h"
+#include "entity.h"
+
+class AudioEngine {
 	enum class AudioRequest {
 		PLAY_AUDIOTRACK,
 		PLAY_MUSIC,
@@ -78,23 +80,16 @@ class Audio {
 		Mix_Chunk* sound;
 		double length;
 	}MixChunkData;
-
-	/*typedef struct audioRequestData {
-		AudioRequest type;
-		EntityName audioSrcName;
-		int left;
-		int right;
-		int angle;
-		int distance;
-		int volume;
-	}AudioRequestData;*/
 public:
-	//Audio();
-	Audio();
-	~Audio();
-	
-	void Init();
-	void ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t defaultMusicVol, uint8_t defaultTrackVol);
+    static AudioEngine& getInstance() {
+        static AudioEngine instance;
+        return instance;
+    }
+
+    AudioEngine(const AudioEngine&) = delete;
+    AudioEngine& operator=(const AudioEngine&) = delete;
+
+	void Init(AudioOptions& options);
 	unsigned long GetTaskQueueLen();
 
 	void PollRequests();
@@ -133,6 +128,9 @@ public:
 
 	void ClearAudio();
 private:
+	Audio() = default;
+	~Audio() = default;
+
 	unsigned long int getChunkTimeMilliseconds(Mix_Chunk* chunk);
 	bool calc_spatial_sound_panning(double maxDistance, vector2 position, uint8_t& left, uint8_t& right);
 	void loadSoundFileInFolder(std::string directory);

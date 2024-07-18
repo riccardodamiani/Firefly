@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_element.h"
 #include "gui_button.h"
 #include "gui_panel.h"
@@ -6,8 +6,6 @@
 #include "structures.h"
 #include "gameEngine.h"
 #include "input.h"
-
-extern Graphics* const _graphicsEngine;
 
 GUI_Element::GUI_Element() {}
 

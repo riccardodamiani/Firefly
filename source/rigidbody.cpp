@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "rigidbody.h"
 #include "gameObject.h"
 #include "physics.h"
@@ -33,13 +32,13 @@ Rigidbody::Rigidbody(GameObject* parent, std::vector <vector2> &vertexes) {
 
 	groupMask = 0xffffffff;
 
-	_PhysicsEngine->RegisterRigidbody(this);
+	PhysicsEngine::getInstance().RegisterRigidbody(this);
 }
 
 Rigidbody::~Rigidbody() {
 	if (boundingBox != nullptr)
 		delete boundingBox;
-	_PhysicsEngine->RemoveRigidbody(this);
+	PhysicsEngine::getInstance().RemoveRigidbody(this);
 }
 
 GameObject* Rigidbody::getParentObject() {
@@ -384,7 +383,7 @@ bool Rigidbody::IsMovable() {
 
 void Rigidbody::SetStatic(bool isS) {
 	isStatic = isS;
-	_PhysicsEngine->_updateStatic(this);
+	PhysicsEngine::getInstance()._updateStatic(this);
 }
 
 bool Rigidbody::IsStatic() {

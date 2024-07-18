@@ -1,11 +1,9 @@
-#include "stdafx.h"
+#include "entity.h"
 #include "gui_panel.h"
 #include "gui_element.h"
 #include "structures.h"
 #include "gui_text.h"
 #include "gameEngine.h"
-
-extern Graphics* const _graphicsEngine;
 
 GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName textureName, vector2 pos, vector2 rect, int layer) {
 
@@ -27,8 +25,8 @@ GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName
 void GUI_Panel::update(double elapsedTime) {
 	vector2 mousePos;
 	if (this->visible) {
-		if (_InputEngine->wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
-			mousePos = _GameEngine->MousePosition();
+		if (InputEngine::getInstance().wasMouseButtonPressed(SDL_BUTTON_LEFT)) {
+			mousePos = GameEngine::getInstance().MousePosition();
 			vector2 thisPos = transform.position;
 			vector2 thisRect = transform.scale;
 
@@ -38,7 +36,7 @@ void GUI_Panel::update(double elapsedTime) {
 				mousePos.y >= thisPos.y - thisRect.y / 2.0 &&
 				mousePos.y <= thisPos.y + thisRect.y / 2.0) {
 
-				_GuiEngine->RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
+				GUIEngine::getInstance().RegisterGuiAction(GuiAction::LEFT_BUTTON_DOWN, this);
 				return;
 			}
 		}

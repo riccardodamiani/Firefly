@@ -6,6 +6,7 @@
 #include <mutex>
 #include "gameEngine.h"
 #include "graphics.h"
+#include "entity.h"
 
 class Sprite {
 public:

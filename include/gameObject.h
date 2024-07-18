@@ -5,6 +5,7 @@
 #include "variables.h"
 #include "gameEngine.h"
 #include "rigidbody.h"
+#include "entity.h"
 
 #include <vector>
 #include <atomic>

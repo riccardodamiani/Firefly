@@ -2,6 +2,7 @@
 #define GUI_BUTTON_H
 
 #include "gameEngine.h"
+#include "entity.h"
 
 class Sprite;
 
