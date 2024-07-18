@@ -47,7 +47,7 @@ void GraphicsEngine::Init(GraphicsOptions &options){
 	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
 	SetLightingQuality_Internal(LightingQuality::LOW_QUALITY);
-	SDL_SetWindowPosition(this->_window, 0, (mode == MODE_FULLSCREEN) ? 0 : 25);
+	SDL_SetWindowPosition(this->_window, 0, (mode == WindowMode::MODE_FULLSCREEN) ? 0 : 25);
 	SDL_SetRenderDrawBlendMode(this->_renderer, SDL_BLENDMODE_BLEND);
 	SetActiveLayers(options.activeLayers);
 }
@@ -117,19 +117,19 @@ void GraphicsEngine::ResolveWindowMode(int mode, int width, int height) {
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
 	SDL_DisplayMode DM = { SDL_PIXELFORMAT_BGRA8888 , 1920, 1080, 50, 0 };
 
-	if (mode == MODE_FULLSCREEN) {		//fullscreen without window bar
+	if (mode == WindowMode::MODE_FULLSCREEN) {		//fullscreen without window bar
 		SDL_GetCurrentDisplayMode(0, &DM);
 		this->windowWidth = DM.w;
 		this->windowHeight = DM.h;
 		this->_windowMode = mode;
 	}
-	else if (mode == MODE_WINDOW_MAX_SIZE) {	//fullscreen with window bar
+	else if (mode == WindowMode::MODE_WINDOW_MAX_SIZE) {	//fullscreen with window bar
 		SDL_GetCurrentDisplayMode(0, &DM);
 		this->windowWidth = DM.w;
 		this->windowHeight = DM.h - 25;
 		this->_windowMode = mode;
 	}
-	else if (mode == MODE_WINDOW) {		//window
+	else if (mode == WindowMode::MODE_WINDOW) {		//window
 		this->windowWidth = width;
 		this->windowHeight = height;
 		this->_windowMode = mode;
@@ -154,7 +154,7 @@ void GraphicsEngine::SetWindow_Internal(int mode, int width, int height) {
 
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
 	SDL_SetWindowSize(this->_window, this->windowWidth, this->windowHeight);
-	SDL_SetWindowPosition(this->_window, 0, (mode == MODE_FULLSCREEN) ? 0 : 25);
+	SDL_SetWindowPosition(this->_window, 0, (mode == WindowMode::MODE_FULLSCREEN) ? 0 : 25);
 }
 
 int GraphicsEngine::GetWindowMode() {
