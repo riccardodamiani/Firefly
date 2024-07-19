@@ -13,7 +13,7 @@ struct GraphicsOptions{
 };
 
 struct AudioOptions{
-    std::vector <unsigned short> &groupChannels;
+    std::vector <unsigned short> groupChannels;
     uint8_t defaultMusicVol;
     uint8_t defaultTrackVol;
 };
