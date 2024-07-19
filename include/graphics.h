@@ -1,12 +1,8 @@
-#pragma once
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
 #include <map>
 #include <string>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
 #include <mutex>
 #include <atomic>
 #include <vector>
@@ -17,6 +13,13 @@
 #include "entity.h"
 #include "game_options.h"
 #include "graphics_structs.h"
+
+struct SDL_Texture;
+struct SDL_Surface;
+struct SDL_Window;
+struct SDL_Renderer;
+struct _TTF_Font;
+typedef struct _TTF_Font TTF_Font;
 
 class GraphicsEngine {
 	//some internal structures
@@ -222,13 +225,13 @@ private:
 	void DrawCustomSurface(SDL_Surface* surface, int width, int height, void (*filter)(CustomFilterData& data), void* args);
 	void DrawLightSurface(LightTextureBakeData*, int width, int height, void (*filter)(CustomFilterData& data));
 
-	void drawLine(int x1, int y1, int x2, int y2, int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A);		//draw a line between point 1 and 2
+	void drawLine(int x1, int y1, int x2, int y2, int width, uint8_t R, uint8_t G, uint8_t B, uint8_t A);		//draw a line between point 1 and 2
 	void setRendererScale(double xScale, double yScale);
 	void drawCircle(vector2 center, int32_t radius, bool fill);
 	void drawEllipse(vector2 center, int32_t a, int32_t b);
 
-	void drawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel, int bytes);	//write a pixel in a surface
-	Uint32 readPixel(SDL_Surface* surface, int x, int y, int bytes);		//read the color of a pixel froma asurface
+	void drawPixel(SDL_Surface* surface, int x, int y, uint32_t pixel, int bytes);	//write a pixel in a surface
+	uint32_t readPixel(SDL_Surface* surface, int x, int y, int bytes);		//read the color of a pixel froma asurface
 	void drawPointInSurface(SDL_Surface* surface, RGBA_Color& color, int x, int y);
 
 	SDL_Surface* ScaleSurface(SDL_Surface* Surface, int Width, int Height);		//scale a surface and return it

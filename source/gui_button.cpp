@@ -7,6 +7,8 @@
 #include "gameEngine.h"
 #include "sprite.h"
 
+#include <SDL.h>
+
 //constructor
 GUI_Button::GUI_Button(EntityName objectName, EntityName textureName, unsigned int elementCode, vector2 pos, vector2 rect, int layer) {
 

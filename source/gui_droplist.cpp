@@ -7,6 +7,7 @@
 #include "sprite.h"
 
 #include <vector>
+#include <SDL.h>
 
 //constructor
 GUI_Droplist::GUI_Droplist(EntityName objectName, unsigned int elementCode, EntityName mainTexture, EntityName background_texture,

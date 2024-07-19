@@ -7,6 +7,7 @@
 #include "gameEngine.h"
 
 #include <vector>
+#include <SDL.h>
 
 //constructor
 GUI_Slider::GUI_Slider(EntityName objectName, unsigned int elementCode, std::vector <AnimatedSprite*> &animatedSprite, vector2 pos, vector2 rect,

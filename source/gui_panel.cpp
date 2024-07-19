@@ -6,6 +6,8 @@
 #include "sprite.h"
 #include "gameEngine.h"
 
+#include <SDL.h>
+
 GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName textureName, vector2 pos, vector2 rect, int layer) {
 
 	transform.position = pos;

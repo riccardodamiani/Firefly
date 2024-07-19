@@ -4,8 +4,6 @@
 #include "gui_element.h"
 #include "entity.h"
 
-struct SDL_Color;
-
 #include "structures.h"
 
 class GUI_Text : public GUI_Element {

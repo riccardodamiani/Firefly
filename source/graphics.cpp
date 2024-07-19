@@ -1322,7 +1322,7 @@ SDL_Surface* GraphicsEngine::ScaleSurface(SDL_Surface *Surface, int Width, int H
 	return _ret;
 }
 
-void GraphicsEngine::drawPixel(SDL_Surface *surface, int x, int y, Uint32 pixel, int bytesNum){
+void GraphicsEngine::drawPixel(SDL_Surface *surface, int x, int y, uint32_t pixel, int bytesNum){
 
 	Uint8 *target_pixel = (Uint8 *)surface->pixels + y * surface->w * bytesNum + x * bytesNum;
 	Uint8 *pixel8 = (Uint8*)&pixel;
@@ -1331,7 +1331,7 @@ void GraphicsEngine::drawPixel(SDL_Surface *surface, int x, int y, Uint32 pixel,
 	}
 }
 
-Uint32 GraphicsEngine::readPixel(SDL_Surface *surface, int x, int y, int bytesNum){
+uint32_t GraphicsEngine::readPixel(SDL_Surface *surface, int x, int y, int bytesNum){
 
 	Uint8 *pixels = (Uint8 *)surface->pixels;
 	Uint32 *pixel32 = 0;
@@ -1345,7 +1345,7 @@ std::pair <int, int> GraphicsEngine::GetWindowSize() {
 }
 
 //draw a line between point 1 and 2
-void GraphicsEngine::drawLine(int x1, int y1, int x2, int y2,int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
+void GraphicsEngine::drawLine(int x1, int y1, int x2, int y2,int width, uint8_t R, uint8_t G, uint8_t B, uint8_t A) {
 	SDL_SetRenderDrawColor(this->_renderer, R, G, B, A);
 	SDL_RenderDrawLine(this->_renderer, x1, y1, x2, y2);
 }

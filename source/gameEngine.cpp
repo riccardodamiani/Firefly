@@ -22,6 +22,9 @@
 #include <malloc.h>
 #include <shared_mutex>
 #include <vector>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 typedef std::shared_mutex RWLock;
 typedef std::unique_lock< RWLock >  WriteLock;
@@ -558,7 +561,7 @@ void GameEngine::mainThread() {
 
 		AudioEngine::getInstance().PollRequests();
 
-		if (InputEngine::getInstance().GetLastEvent() == InputEvent::CLOSE_WINDOW) {
+		if (InputEngine::getInstance().GetLastEvent() == InputEvent::QUIT_APP) {
 			_lastGameEvent = GameEvent::GAME_QUIT;
 		}
 

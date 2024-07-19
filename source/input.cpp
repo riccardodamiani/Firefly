@@ -1,11 +1,13 @@
 #include "input.h"
 #include "graphics.h"
 #include "gui.h"
+
+#include <SDL.h>
+#include <SDL_events.h>
 #include <mutex>
 #include <atomic>
 
 InputEngine::InputEngine() {
-	
 }
 
 void InputEngine::Init(){
@@ -70,8 +72,8 @@ void InputEngine::StopTextInput() {
 }
 
 InputEvent InputEngine::GetLastEvent() {
-	if (_lastEvent == SDL_QUIT) {
-		return InputEvent::CLOSE_WINDOW;
+	if ((SDL_EventType)_lastEvent.load() == SDL_QUIT) {
+		return InputEvent::QUIT_APP;
 	}
 }
 
@@ -82,17 +84,17 @@ void InputEngine::getSDLEvent() {
 
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
-			_lastEvent = SDL_QUIT;
+			_lastEvent = (EventType)SDL_QUIT;
 			return;
 		}		//mouse input
 		else if (event.type == SDL_MOUSEBUTTONDOWN) {
-			this->mouseKeyDown(event);
+			this->mouseKeyDown(&event);
 		}
 		else if (event.type == SDL_MOUSEBUTTONUP) {
-			this->mouseKeyUp(event);
+			this->mouseKeyUp(&event);
 		}
 		else if (event.type == SDL_MOUSEMOTION) {
-			this->updateMousePosition(event);
+			this->updateMousePosition(&event);
 		}
 		else if (event.type == SDL_MOUSEWHEEL) {
 			this->_didMouseWheelMove = true;
@@ -120,11 +122,11 @@ void InputEngine::getSDLEvent() {
 		}		//keyboard input
 		else if (event.type == SDL_KEYDOWN) {
 			if (event.key.repeat == 0) {
-				this->keyDownEvent(event);
+				this->keyDownEvent(&event);
 			}
 		}
 		else if (event.type == SDL_KEYUP) {
-			this->keyUpEvent(event);
+			this->keyUpEvent(&event);
 		}
 	}
 
@@ -132,50 +134,50 @@ void InputEngine::getSDLEvent() {
 }
 
 //gets called when a key is pressed
-void InputEngine::keyDownEvent(const SDL_Event& event) {
+void InputEngine::keyDownEvent(const SDL_Event* event) {
 
-	this->_pressedKeys[event.key.keysym.scancode] = true;
-	this->_heldKeys[event.key.keysym.scancode] = true;
+	this->_pressedKeys[event->key.keysym.scancode] = true;
+	this->_heldKeys[event->key.keysym.scancode] = true;
 }
 
 //gets called when a key is released
-void InputEngine::keyUpEvent(const SDL_Event& event) {
+void InputEngine::keyUpEvent(const SDL_Event* event) {
 
-	this->_releasedKeys[event.key.keysym.scancode] = true;
-	this->_heldKeys[event.key.keysym.scancode] = false;
+	this->_releasedKeys[event->key.keysym.scancode] = true;
+	this->_heldKeys[event->key.keysym.scancode] = false;
 }
 
 //checks if a certain key was pressed during the current frame
-bool InputEngine::wasKeyPressed(SDL_Scancode key) {
+bool InputEngine::wasKeyPressed(Scancode key) {
 	return this->_pressedKeys[key];
 }
 
 //checks if a certain key was released during the current frame
-bool InputEngine::wasKeyReleased(SDL_Scancode key) {
+bool InputEngine::wasKeyReleased(Scancode key) {
 	return this->_releasedKeys[key];
 }
 
 //checks if a certain key is currently being held
-bool InputEngine::isKeyHeld(SDL_Scancode key) {
+bool InputEngine::isKeyHeld(Scancode key) {
 	return this->_heldKeys[key];
 }
 
 //gets called when a mouse button is pressed
-void InputEngine::mouseKeyDown(const SDL_Event& event) {
+void InputEngine::mouseKeyDown(const SDL_Event* event) {
 
-	this->_pressedMouseKeys[event.button.button] = true;
-	this->_heldMouseKeys[event.button.button] = true;
-	this->_lastClickX = event.button.x;
-	this->_lastClickY = event.button.y;
+	this->_pressedMouseKeys[event->button.button] = true;
+	this->_heldMouseKeys[event->button.button] = true;
+	this->_lastClickX = event->button.x;
+	this->_lastClickY = event->button.y;
 }
 
 //gets called when a mouse button is released
-void InputEngine::mouseKeyUp(const SDL_Event& event) {
+void InputEngine::mouseKeyUp(const SDL_Event* event) {
 
-	this->_releasedMouseKeys[event.button.button] = true;
-	this->_heldMouseKeys[event.button.button] = false;
-	this->_lastClickX = event.button.x;
-	this->_lastClickY = event.button.y;
+	this->_releasedMouseKeys[event->button.button] = true;
+	this->_heldMouseKeys[event->button.button] = false;
+	this->_lastClickX = event->button.x;
+	this->_lastClickY = event->button.y;
 }
 
 //checks if a certain mouse button is pressed
@@ -220,10 +222,10 @@ std::pair<int, int> InputEngine::getLastWheelMoviment() {
 }
 
 //gets called if the mouse moves
-void InputEngine::updateMousePosition(const SDL_Event& event) {
+void InputEngine::updateMousePosition(const SDL_Event* event) {
 
-	this->_lastMousePositionX = event.motion.x;
-	this->_lastMousePositionY = event.motion.y;
+	this->_lastMousePositionX = event->motion.x;
+	this->_lastMousePositionY = event->motion.y;
 	this->_didMouseMove = true;
 }	
 

@@ -2,7 +2,6 @@
 #define AUDIO_H
 
 #include <map>
-#include <SDL_mixer.h>
 #include <mutex>
 #include <atomic>
 #include "gameEngine.h"
@@ -11,6 +10,10 @@
 
 #include "audio_source.h"
 #include "entity.h"
+
+struct Mix_Chunk;
+struct _Mix_Music;
+typedef struct _Mix_Music Mix_Music;
 
 class AudioEngine {
 	enum class AudioRequest {
