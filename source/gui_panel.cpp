@@ -3,6 +3,7 @@
 #include "gui_element.h"
 #include "structures.h"
 #include "gui_text.h"
+#include "sprite.h"
 #include "gameEngine.h"
 
 GUI_Panel::GUI_Panel(EntityName objectName, unsigned int elementCode, EntityName textureName, vector2 pos, vector2 rect, int layer) {

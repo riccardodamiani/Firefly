@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "variables.h"
 #include <mutex>
+#include <math.h>
 
 #define PI 3.14159265358979323846
 
@@ -30,7 +31,7 @@ typedef struct Transform {
 		double deltaAngle = atan2(deltaPos.y, deltaPos.x) * (180/PI);
 		deltaAngle += rot;
 		double distance = sqrt(deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y);
-		vector2 newPos = { pivotPoint.x + distance * std::cos(PI * deltaAngle / 180.0), pivotPoint.y + distance * sin(PI * deltaAngle / 180.0)};
+		vector2 newPos = { pivotPoint.x + distance * cos(PI * deltaAngle / 180.0), pivotPoint.y + distance * sin(PI * deltaAngle / 180.0)};
 		position = newPos;
 		rotation += rot;
 	}

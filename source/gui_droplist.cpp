@@ -4,6 +4,9 @@
 #include "structures.h"
 #include "gui_text.h"
 #include "gameEngine.h"
+#include "sprite.h"
+
+#include <vector>
 
 //constructor
 GUI_Droplist::GUI_Droplist(EntityName objectName, unsigned int elementCode, EntityName mainTexture, EntityName background_texture,

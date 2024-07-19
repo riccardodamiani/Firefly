@@ -2,6 +2,7 @@
 #include "structures.h"
 #include <atomic>
 #include <mutex>
+#include <memory>
 
 Variable::Variable() {
 

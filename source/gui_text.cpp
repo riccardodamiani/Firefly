@@ -47,7 +47,7 @@ vector2 GUI_Text::getCursorPosition(int cursorIndex) {
 	vector2 startPos = transform.position;
 	vector2 textSize = GraphicsEngine::getInstance().GetTextSize(_atlasName, _text, cursorIndex, transform.scale.y());
 	vector2 delta = { textSize.x - startScale.x/2, -textSize.y};
-	vector2 cursorPos = { startPos.x + delta.x * std::cos(startRot * (M_PI / 180.0)), startPos.y + delta.y + delta.x * std::sin(startRot * (M_PI / 180.0)) };
+	vector2 cursorPos = { startPos.x + delta.x * std::cos(startRot * (MATH_PI / 180.0)), startPos.y + delta.y + delta.x * std::sin(startRot * (MATH_PI / 180.0)) };
 	return cursorPos;
 }
 

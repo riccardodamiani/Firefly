@@ -10,6 +10,7 @@
 #include <mutex>
 #include <memory>
 #include <math.h>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -63,17 +64,6 @@ void AudioEngine::Init(AudioOptions& options) {
 	}
 
 	this->loadSoundFileInFolder("Sound");		//load sound files
-}
-
-void AudioEngine::ConfigEngine(std::vector <unsigned short>& groupChannels, uint8_t defaultMusicVol, uint8_t defaultTrackVol) {
-	_channelsToAllocate = 0;
-
-	_defaultMusicVolume = defaultMusicVol;
-	_defaultTrackVolume = defaultTrackVol;
-	_audioGroupChannels = groupChannels;
-	for (auto it = _audioGroupChannels.begin(); it != _audioGroupChannels.end(); it++) {
-		_channelsToAllocate += *it;
-	}
 }
 
 unsigned long AudioEngine::GetTaskQueueLen() {

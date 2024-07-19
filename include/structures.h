@@ -9,6 +9,18 @@ const int ALIGN_RIGHT = 2;
 const int ALIGN_TOP = 3;
 const int ALIGN_BOTTOM = 4;
 
+#include <vector>
+#include <stdint.h>
+
+#define MATH_PI 3.14159265358979323846264f
+
+struct RGBA_Color {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
+};
+
 //vector2
 typedef struct vector2 {
 	double x;

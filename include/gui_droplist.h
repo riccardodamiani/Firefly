@@ -3,7 +3,10 @@
 
 //class of gui element: droplist
 #include "gui_panel.h"
+#include "gui_element.h"
 #include "entity.h"
+
+#include <vector>
 
 class GUI_Droplist : public GUI_Element {
 public:

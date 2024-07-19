@@ -8,7 +8,9 @@
 #include "transform.h"
 #include "physics.h"
 #include "rigidbody.h"
+
 #include <mutex>
+#include <vector>
 
 GameObject::GameObject(){
 	_constraintParent = { 0, false, false, false, false, false, {0, 0}, {0, 0}, 0 };

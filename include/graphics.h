@@ -9,38 +9,14 @@
 #include <SDL_ttf.h>
 #include <mutex>
 #include <atomic>
+#include <vector>
 
 #include "structures.h"
 #include "gameEngine.h"
 #include "lightObject.h"
 #include "entity.h"
-
-//windows modes
-enum WindowMode{
-	MODE_FULLSCREEN = 1,
-	MODE_WINDOW_MAX_SIZE = 2,
-	MODE_WINDOW = 3
-};
-
-enum class TextureFlip
-{
-	FLIP_NONE = 0x00000000,     /**< Do not flip */
-	FLIP_HORIZONTAL = 0x00000001,    /**< flip horizontally */
-	FLIP_VERTICAL = 0x00000002     /**< flip vertically */
-};
-
-enum class LightingQuality {
-	LOW_QUALITY,	//720p
-	MEDIUM_QUALITY,		//1080p
-	HIGH_QUALITY		//1440p
-};
-
-struct CustomFilterData {
-	int textureWidth, textureHeight;
-	int x, y;
-	SDL_Color pixelColor;
-	void* args;
-};
+#include "game_options.h"
+#include "graphics_structs.h"
 
 class GraphicsEngine {
 	//some internal structures
@@ -89,7 +65,7 @@ class GraphicsEngine {
 
 	typedef struct textureCreation {
 		int processType;
-		SDL_Color color;
+		RGBA_Color color;
 		bool fill;
 		int width_or_radius, height;
 		EntityName name;
@@ -99,7 +75,7 @@ class GraphicsEngine {
 
 	struct fontAtlasInfo {
 		EntityName atlasName;
-		SDL_Color color, bgColor;
+		RGBA_Color color, bgColor;
 		TTF_Font* font;		//contains the font object
 	};
 
@@ -119,7 +95,7 @@ class GraphicsEngine {
 	typedef struct fontStruct {
 		EntityName atlasName;
 		std::string fontName;
-		SDL_Color color, backgroundColor;
+		RGBA_Color color, backgroundColor;
 		long resolution = 72;
 	}FontStruct;
 
@@ -160,7 +136,7 @@ public:
     GraphicsEngine(const GraphicsEngine&) = delete;
     GraphicsEngine& operator=(const GraphicsEngine&) = delete;
 
-	Init(GraphicsOptions &options);
+	void Init(GraphicsOptions &options);
 
 	//requests that can be processed immediately
 	void Flip();		//renders everything to the screen
@@ -173,7 +149,7 @@ public:
 
 	int GetWindowMode();
 	std::pair <int, int> GetWindowSize();		//return the width of the window
-	void SetBackgroundColor(SDL_Color& color);
+	void SetBackgroundColor(RGBA_Color& color);
 	
 	vector2 GetTextSize(EntityName atlasName, std::string text, int count, double Y_TextScale);
 	vector2 screenToSpace(int x_coord, int y_coord);
@@ -181,10 +157,10 @@ public:
 	//method for creating requests to the graphics engine
 	void SetWindowTitle(std::string title);
 	void SetWindow(int mode, int width, int height);		//set window size and mode (public)
-	void CreateRectangleTexture(SDL_Color& color, int width, int height, bool fill, EntityName name);
-	void CreateCircleTexture(SDL_Color& color, int radius, bool fill, EntityName name);
+	void CreateRectangleTexture(RGBA_Color& color, int width, int height, bool fill, EntityName name);
+	void CreateCircleTexture(RGBA_Color& color, int radius, bool fill, EntityName name);
 	void CreateCustomTexture(int width, int height, void (*filter)(CustomFilterData &data), EntityName name, void* args);
-	void LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName = "OpenSans", long resolution = 72);
+	void LoadFontAtlas(EntityName atlasName, RGBA_Color color, RGBA_Color backgroundColor, std::string fontName = "OpenSans", long resolution = 72);
 	void BakeLightTexture(LightObjectData lightData);
 	void LoadTextureGroup(const char* groupName);
 	void DestroyTexture(EntityName name);
@@ -203,16 +179,16 @@ public:
 
 	unsigned long GetTaskQueueLen();
 private:
-	GraphicsEngine() = default;
-	~GraphicsEngine() = default;
+	GraphicsEngine();
+	~GraphicsEngine();
 
 	//internal methods for handling specific requests that need SDL calls
 	void SetWindowTitle_Internal(std::string title);
 	void SetWindow_Internal(int mode, int width, int height);
-	void CreateRectangleTexture_Internal(SDL_Color& color, int width, int height, bool fill, EntityName name);
-	void CreateCircleTexture_Internal(SDL_Color& color, int radius, bool fill, EntityName name);
+	void CreateRectangleTexture_Internal(RGBA_Color& color, int width, int height, bool fill, EntityName name);
+	void CreateCircleTexture_Internal(RGBA_Color& color, int radius, bool fill, EntityName name);
 	void CreateCustomTexture_Internal(int width, int height, void (*filter)(CustomFilterData& data), EntityName name, void* args);
-	void LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution);
+	void LoadFontAtlas_Internal(EntityName atlasName, RGBA_Color color, RGBA_Color backgroundColor, std::string fontName, long resolution);
 	void LoadFontChar_Internal(fontCharCreation* fontCharData);
 	void LoadTextureFromFile(std::string &pathName, std::string &filename, EntityName groupName);
 	void LoadTextureFromFile_Internal(std::string& pathName, std::string &filename, EntityName groupName);
@@ -241,32 +217,32 @@ private:
 
 	//int createTexture(int width, int height, int filter);
 	SDL_Surface* CreateSurface(int width, int height);
-	void DrawRectangleInSurface(SDL_Surface* surface, SDL_Color* color, int width, int height, bool fill);
-	void DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int radius, bool fill);
+	void DrawRectangleInSurface(SDL_Surface* surface, RGBA_Color* color, int width, int height, bool fill);
+	void DrawCircleInSurface(SDL_Surface* surface, RGBA_Color* color, int radius, bool fill);
 	void DrawCustomSurface(SDL_Surface* surface, int width, int height, void (*filter)(CustomFilterData& data), void* args);
 	void DrawLightSurface(LightTextureBakeData*, int width, int height, void (*filter)(CustomFilterData& data));
 
 	void drawLine(int x1, int y1, int x2, int y2, int width, Uint8 R, Uint8 G, Uint8 B, Uint8 A);		//draw a line between point 1 and 2
 	void setRendererScale(double xScale, double yScale);
 	void drawCircle(vector2 center, int32_t radius, bool fill);
-	void Graphics::drawEllipse(vector2 center, int32_t a, int32_t b);
+	void drawEllipse(vector2 center, int32_t a, int32_t b);
 
 	void drawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel, int bytes);	//write a pixel in a surface
 	Uint32 readPixel(SDL_Surface* surface, int x, int y, int bytes);		//read the color of a pixel froma asurface
-	void drawPointInSurface(SDL_Surface* surface, SDL_Color& color, int x, int y);
+	void drawPointInSurface(SDL_Surface* surface, RGBA_Color& color, int x, int y);
 
 	SDL_Surface* ScaleSurface(SDL_Surface* Surface, int Width, int Height);		//scale a surface and return it
 
 	std::pair <bool, int> FindTexture(EntityName texName);
 	void PushTexture(TextureData* texture);
 
-	void CreateTextSurface(EntityName name, std::string text, TTF_Font *font, SDL_Color color, SDL_Color backgroundColor, vector2 &size);
+	void CreateTextSurface(EntityName name, std::string text, TTF_Font *font, RGBA_Color color, RGBA_Color backgroundColor, vector2 &size);
 	bool isCharPrint(char c);
 	
 	//window stuff
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
-	SDL_Color _backgroundColor;
+	RGBA_Color _backgroundColor;
 	std::atomic <int> windowWidth;
 	std::atomic <int> windowHeight;
 	std::atomic <int> _windowMode;

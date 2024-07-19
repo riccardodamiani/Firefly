@@ -6,6 +6,8 @@
 #include "input.h"
 #include "multithreadManager.h"
 #include "entity.h"
+#include "game_options.h"
+#include "gameEngine_structs.h"
 
 #include <vector>
 #include <mutex>
@@ -29,20 +31,6 @@ class Barrier;
 class LightObject;
 class Scene;
 class GUI_Element;
-
-typedef unsigned long long EntityName;
-typedef std::shared_mutex RWLock;
-typedef std::unique_lock< RWLock >  WriteLock;
-typedef std::shared_lock< RWLock >  ReadLock;
-
-enum class GameEvent {
-	NO_EVENT,
-	GAME_QUIT
-};
-enum class TransformPivotPoint {
-	PARENT_CENTER,
-	OBJECT_CENTER
-};
 
 class GameEngine {
 	enum class GameEngineRequestType {
@@ -122,10 +110,10 @@ public:
 	//internal use
 	void _GuiListener(GUI_Element* element, GuiAction action);
 private:
-	GameEngine() = default;
-	~GameEngine() = default;
+	GameEngine();
+	~GameEngine();
 
-	Init_Engines(GraphicsOptions& g_options, AudioOptions& a_options);
+	void Init_Engines(GraphicsOptions& g_options, AudioOptions& a_options);
 	void mainThread();
 	void gameThread();
 

@@ -3,6 +3,7 @@
 
 #include "gui.h"
 #include "gui_element.h"
+#include "gameEngine_structs.h"
 
 class Scene {
 public:

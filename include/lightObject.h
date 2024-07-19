@@ -6,6 +6,8 @@
 #include "variables.h"
 #include "entity.h"
 
+#include <vector>
+
 enum class LightType {
 	POINT_LIGHT,
 	GLOBAL_LIGHT
@@ -20,21 +22,21 @@ struct LightObjectData {
 	LightType type;
 	EntityName lightTextureName;
 	bool colorRebake;
-	SDL_Color color;
+	RGBA_Color color;
 	double parab_a, parab_b, parab_c;
 };
 
 class LightObject : public GameObject{
 public:
 	LightObject(EntityName name, vector2 position, double rotation, LightObject* originalLight);
-	LightObject(EntityName name, vector2 position, double rotation, double power, double lightAngle, SDL_Color color, LightType type);
+	LightObject(EntityName name, vector2 position, double rotation, double power, double lightAngle, RGBA_Color color, LightType type);
 	~LightObject();
 	LightObjectData GetLightData();
 	bool RequireColorRebake();
 	void ResetChanged();
 	void SetPower(double power);
 	void SetAngle(double angle);
-	void SetColor(SDL_Color color);
+	void SetColor(RGBA_Color color);
 	
 	bool _createInstance(LightObject* instance);
 	void _deleteInstance(LightObject* instance);
@@ -52,7 +54,7 @@ private:
 	Double _lightRadius;
 	LightType _type;
 	Bool _colorRebake;		//if true tells the graphics engine to redraw the color of the light texture
-	SDL_Color _color;
+	RGBA_Color _color;
 	double parab_a, parab_b, parab_c;
 };
 

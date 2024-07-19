@@ -14,12 +14,14 @@
 #include "lightObject.h"
 #include "scene.h"
 #include "game_options.h"
+#include "physics.h"
 
 #include <chrono>
 #include <thread>
 #include <string.h>
 #include <malloc.h>
 #include <shared_mutex>
+#include <vector>
 
 typedef std::shared_mutex RWLock;
 typedef std::unique_lock< RWLock >  WriteLock;

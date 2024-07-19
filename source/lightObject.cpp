@@ -2,6 +2,8 @@
 #include "lightObject.h"
 #include "graphics.h"
 
+
+
 LightObject::LightObject(EntityName name, vector2 position, double rotation, LightObject* originalLight) {
 
 	transform.position = position;
@@ -20,7 +22,7 @@ LightObject::LightObject(EntityName name, vector2 position, double rotation, Lig
 
 }
 
-LightObject::LightObject(EntityName name, vector2 position, double rotation, double power, double lightAngle, SDL_Color color, LightType type) {
+LightObject::LightObject(EntityName name, vector2 position, double rotation, double power, double lightAngle, RGBA_Color color, LightType type) {
 	
 	transform.position = position;
 	transform.scale = { 1, 1 };
@@ -132,7 +134,7 @@ void LightObject::ResetChanged() {
 	_colorRebake = false;
 }
 
-void LightObject::SetColor(SDL_Color color) {
+void LightObject::SetColor(RGBA_Color color) {
 
 	if (_isInstance) {
 		return;
@@ -151,7 +153,7 @@ void LightObject::CalculateLight() {
 	if (_type == LightType::POINT_LIGHT) {
 
 		//the radius of the light is equal to the distance from the source where the light intensity is equal to 0.05
-		double lightRadius = sqrt(power / (0.05 * (1.0 + 2.0 * lightAngle * (PI / 180.0))));
+		double lightRadius = sqrt(power / (0.05 * (1.0 + 2.0 * lightAngle * (MATH_PI / 180.0))));
 		_lightRadius = lightRadius;
 
 		//calculate the coefficients of the parabola that aproximate the light decay

@@ -7,6 +7,7 @@
 #include <atomic>
 #include "gameEngine.h"
 #include <memory>
+#include <vector>
 
 #include "audio_source.h"
 #include "entity.h"
@@ -128,8 +129,8 @@ public:
 
 	void ClearAudio();
 private:
-	Audio() = default;
-	~Audio() = default;
+	AudioEngine();
+	~AudioEngine();
 
 	unsigned long int getChunkTimeMilliseconds(Mix_Chunk* chunk);
 	bool calc_spatial_sound_panning(double maxDistance, vector2 position, uint8_t& left, uint8_t& right);

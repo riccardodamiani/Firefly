@@ -1,10 +1,8 @@
 #ifndef GUI_BUTTON_H
 #define GUI_BUTTON_H
 
-#include "gameEngine.h"
+#include "gui_element.h"
 #include "entity.h"
-
-class Sprite;
 
 class GUI_Button : public GUI_Element {
 public:

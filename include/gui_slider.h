@@ -1,8 +1,12 @@
 #ifndef GUI_SLIDER_H
 #define GUI_SLIDER_H
 
-#include "gameEngine.h"
+#include "gui_element.h"
 #include "entity.h"
+#include "variables.h"
+
+#include <vector>
+
 class AnimatedSprite;
 
 class GUI_Slider : public GUI_Element {

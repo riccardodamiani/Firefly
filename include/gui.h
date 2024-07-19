@@ -3,6 +3,7 @@
 
 #include <map>
 #include <mutex>
+#include <vector>
 #include <atomic>
 
 class Input;
@@ -50,8 +51,8 @@ public:
 	void beginNewFrame();
 	void clearFocus();
 private:
-	GUIEngine() = default;
-	~GUIEngine() = default;
+	GUIEngine();
+	~GUIEngine();
 	std::atomic <GUI_Element*> focusedElement;
 	std::vector <Action> elementActions;
 	std::mutex update_mutex;

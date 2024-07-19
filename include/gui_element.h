@@ -1,11 +1,7 @@
 #ifndef GUI_ELEMENT_H
 #define GUI_ELEMENT_H
 
-#include "graphics.h"
-#include "sprite.h"
-#include "input.h"
 #include "variables.h"
-#include "gameEngine.h"
 #include "gameObject.h"
 #include "gui.h"
 #include <mutex>

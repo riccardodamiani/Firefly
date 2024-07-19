@@ -3,9 +3,9 @@
 
 #include "structures.h"
 #include "variables.h"
-#include "gameEngine.h"
 #include "rigidbody.h"
 #include "entity.h"
+#include "transform.h"
 
 #include <vector>
 #include <atomic>
@@ -13,7 +13,6 @@
 class Sprite;
 class AnimatedSprite;
 class Animation;
-class Transform;
 
 class GameObject {
 public:

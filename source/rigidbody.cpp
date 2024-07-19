@@ -2,6 +2,8 @@
 #include "gameObject.h"
 #include "physics.h"
 
+#include <vector>
+
 Rigidbody::Rigidbody(GameObject* parent, std::vector <vector2> &vertexes) {
 
 	boundingBox = nullptr;
@@ -149,7 +151,7 @@ void Rigidbody::_setCollisions(Rigidbody* body, vector2 contactPoint,
 	}
 
 	//translate, rotate and scale the polygon
-	double rot = (parentObject->transform.rotation - meshRot) * (PI / 180.0);
+	double rot = (parentObject->transform.rotation - meshRot) * (MATH_PI / 180.0);
 	for (int i = 0; i < _mesh.v.size(); i++) {
 		_mesh.v[i] = { (_mesh.v[i].x / meshScale.x) * scale.x, (_mesh.v[i].y / meshScale.y) * scale.y };
 		_mesh.v[i] = {
@@ -217,7 +219,7 @@ void Rigidbody::_resolveCollisions(double timeElapsed) {
 		parentObject->transform.position += _prevCollision[i].postCollisionPosition;
 
 		vector2 r = getRelativePoint(_prevCollision[i].contactPoint);
-		angularVelocity -= (r.cross({ normal.x * impulse, normal.y * impulse }) / momentOfInertia) * 180 / PI;
+		angularVelocity -= (r.cross({ normal.x * impulse, normal.y * impulse }) / momentOfInertia) * 180 / MATH_PI;
 	}
 }
 

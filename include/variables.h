@@ -1,8 +1,6 @@
 #ifndef GLOBAL_VARIABLE_H
 #define GLOBAL_VARIABLE_H
 
-#include "gameEngine.h"
-#include "globals.h"
 #include "structures.h"
 #include <atomic>
 #include <mutex>
@@ -20,7 +18,7 @@ public:
 protected:
 	std::mutex u_mutex;
 };
- 
+
 
 class Bool : public Variable {
 public:

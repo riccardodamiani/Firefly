@@ -2,11 +2,14 @@
 #define RIGIDBODY_H
 
 #include <atomic>
+#include <vector>
+#include <mutex>
+
 #include "structures.h"
-#include "physics.h"
+#include "physics_structs.h"
+#include "variables.h"
 
 class GameObject;
-
 
 class Rigidbody {
 

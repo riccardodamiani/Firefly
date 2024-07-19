@@ -4,8 +4,8 @@
 #include <string>
 #include <atomic>
 #include <mutex>
-#include "gameEngine.h"
-#include "graphics.h"
+
+#include "graphics_structs.h"
 #include "entity.h"
 
 class Sprite {

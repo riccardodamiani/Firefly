@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "audio.h"
+#include "graphics.h"
 
 Scene::Scene(unsigned int id) {
 	_id = id;

@@ -2,9 +2,12 @@
 #include "physics.h"
 #include "rigidbody.h"
 #include "gameObject.h"
+#include "transform.h"
+#include "structures.h"
 
 #include <mutex>
 #include <memory>
+#include <vector>
 
 PhysicsEngine::PhysicsEngine() {
 
@@ -147,8 +150,8 @@ void PhysicsEngine::_resolveCollision(CollisionStruct& c) {
 	vector2 ra = c.A->getRelativePoint(c.contactPoint);
 	vector2 rb = c.B->getRelativePoint(c.contactPoint);
 
-	c.A->angularVelocity += (ra.cross({ normal.x * impulse, normal.y * impulse }) / c.A->getMOI()) * 180 / PI;
-	c.B->angularVelocity -= (rb.cross({ normal.x * impulse, normal.y * impulse }) / c.B->getMOI()) * 180 / PI;
+	c.A->angularVelocity += (ra.cross({ normal.x * impulse, normal.y * impulse }) / c.A->getMOI()) * 180 / MATH_PI;
+	c.B->angularVelocity -= (rb.cross({ normal.x * impulse, normal.y * impulse }) / c.B->getMOI()) * 180 / MATH_PI;
 }
 
 void PhysicsEngine::_resolveFriction(CollisionStruct& c) {
@@ -205,7 +208,7 @@ void PhysicsEngine::_resolveFriction(CollisionStruct& c) {
 
 void PhysicsEngine::createRegularPolygon(int sidesCount, double radius, std::vector <vector2>& vertexes) {
 	for (int i = 0; i < sidesCount; i++) {
-		vertexes.push_back({ radius * cos(2 * PI * i / sidesCount), radius * sin(2 * PI * i / sidesCount) });
+		vertexes.push_back({ radius * cos(2 * MATH_PI * i / sidesCount), radius * sin(2 * MATH_PI * i / sidesCount) });
 	}
 }
 
@@ -460,8 +463,8 @@ void PhysicsEngine::Check_Convex_Convex_Collision(double timeElapsed,
 	vector2 r1 = { collisionPoint.x - mesh1.centerOfMass.x, collisionPoint.y - mesh1.centerOfMass.y };
 	vector2 r2 = { collisionPoint.x - mesh2.centerOfMass.x, collisionPoint.y - mesh2.centerOfMass.y };
 
-	double av1 = body1->angularVelocity * PI / 180.0;
-	double av2 = body2->angularVelocity * PI / 180.0;
+	double av1 = body1->angularVelocity * MATH_PI / 180.0;
+	double av2 = body2->angularVelocity * MATH_PI / 180.0;
 
 	vector2 cp1_v = { velocity1.x - av1 * r1.y, velocity1.y + av1 * r1.x };
 	vector2 cp2_v = { velocity2.x - av2 * r2.y, velocity2.y + av2 * r2.x };

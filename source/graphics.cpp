@@ -12,6 +12,8 @@
 #include <filesystem>
 #include <fstream>
 #include <cmath>
+#include <iostream>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -19,11 +21,11 @@ namespace fs = std::filesystem;
 #define MAX_LAYER 50
 
 GraphicsEngine::GraphicsEngine() {
-
+	
 }
 
 GraphicsEngine::~GraphicsEngine() {
-
+	SDL_DestroyWindow(this->_window);
 }
 
 void GraphicsEngine::Init(GraphicsOptions &options){
@@ -41,13 +43,13 @@ void GraphicsEngine::Init(GraphicsOptions &options){
 	enableSceneLighting = false;
 	max_lighting_layer = 10;
 	
-	ResolveWindowMode(options.mode, options.width, options.height);		//set the dimension of the screen
+	ResolveWindowMode((int)options.mode, options.width, options.height);		//set the dimension of the screen
 
 	_window = SDL_CreateWindow("", 0, 0, this->windowWidth, this->windowHeight, 0);
 	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
 	SetLightingQuality_Internal(LightingQuality::LOW_QUALITY);
-	SDL_SetWindowPosition(this->_window, 0, (mode == WindowMode::MODE_FULLSCREEN) ? 0 : 25);
+	SDL_SetWindowPosition(_window, 0, (options.mode == WindowMode::MODE_FULLSCREEN) ? 0 : 25);
 	SDL_SetRenderDrawBlendMode(this->_renderer, SDL_BLENDMODE_BLEND);
 	SetActiveLayers(options.activeLayers);
 }
@@ -117,19 +119,19 @@ void GraphicsEngine::ResolveWindowMode(int mode, int width, int height) {
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
 	SDL_DisplayMode DM = { SDL_PIXELFORMAT_BGRA8888 , 1920, 1080, 50, 0 };
 
-	if (mode == WindowMode::MODE_FULLSCREEN) {		//fullscreen without window bar
+	if ((WindowMode)mode == WindowMode::MODE_FULLSCREEN) {		//fullscreen without window bar
 		SDL_GetCurrentDisplayMode(0, &DM);
 		this->windowWidth = DM.w;
 		this->windowHeight = DM.h;
 		this->_windowMode = mode;
 	}
-	else if (mode == WindowMode::MODE_WINDOW_MAX_SIZE) {	//fullscreen with window bar
+	else if ((WindowMode)mode == WindowMode::MODE_WINDOW_MAX_SIZE) {	//fullscreen with window bar
 		SDL_GetCurrentDisplayMode(0, &DM);
 		this->windowWidth = DM.w;
 		this->windowHeight = DM.h - 25;
 		this->_windowMode = mode;
 	}
-	else if (mode == WindowMode::MODE_WINDOW) {		//window
+	else if ((WindowMode)mode == WindowMode::MODE_WINDOW) {		//window
 		this->windowWidth = width;
 		this->windowHeight = height;
 		this->_windowMode = mode;
@@ -154,15 +156,11 @@ void GraphicsEngine::SetWindow_Internal(int mode, int width, int height) {
 
 	std::lock_guard<std::mutex> guard(window_resize_mutex);
 	SDL_SetWindowSize(this->_window, this->windowWidth, this->windowHeight);
-	SDL_SetWindowPosition(this->_window, 0, (mode == WindowMode::MODE_FULLSCREEN) ? 0 : 25);
+	SDL_SetWindowPosition(this->_window, 0, (mode == (int)WindowMode::MODE_FULLSCREEN) ? 0 : 25);
 }
 
 int GraphicsEngine::GetWindowMode() {
 	return this->_windowMode;
-}
-
-GraphicsEngine::~GraphicsEngine() {
-	SDL_DestroyWindow(this->_window);
 }
 
 //this function could return slight a wrong queue size
@@ -368,7 +366,7 @@ void GraphicsEngine::CreateCustomTexture(int width, int height, void (*filter)(C
 
 
 //create a texture of a circle
-void GraphicsEngine::CreateCircleTexture(SDL_Color& color, int radius, bool fill, EntityName name) {
+void GraphicsEngine::CreateCircleTexture(RGBA_Color& color, int radius, bool fill, EntityName name) {
 	if (name == 0) {
 		name = GameEngine::getInstance().GenerateRandomName();
 	}
@@ -383,7 +381,7 @@ void GraphicsEngine::CreateCircleTexture(SDL_Color& color, int radius, bool fill
 }
 
 //create a texture of a solid rectangle and returns the id of the texture
-void GraphicsEngine::CreateRectangleTexture(SDL_Color& color, int width, int height, bool fill, EntityName name) {
+void GraphicsEngine::CreateRectangleTexture(RGBA_Color& color, int width, int height, bool fill, EntityName name) {
 
 	if (name == 0) {
 		name = GameEngine::getInstance().GenerateRandomName();
@@ -400,7 +398,7 @@ void GraphicsEngine::CreateRectangleTexture(SDL_Color& color, int width, int hei
 
 }
 
-void GraphicsEngine::CreateRectangleTexture_Internal(SDL_Color& color, int width, int height, bool fill, EntityName name) {
+void GraphicsEngine::CreateRectangleTexture_Internal(RGBA_Color& color, int width, int height, bool fill, EntityName name) {
 	SDL_Surface* surface = this->CreateSurface(width, height);
 	DrawRectangleInSurface(surface, &color, width, height, fill);
 
@@ -414,7 +412,7 @@ void GraphicsEngine::CreateRectangleTexture_Internal(SDL_Color& color, int width
 }
 
 
-void GraphicsEngine::CreateCircleTexture_Internal(SDL_Color& color, int radius, bool fill, EntityName name) {
+void GraphicsEngine::CreateCircleTexture_Internal(RGBA_Color& color, int radius, bool fill, EntityName name) {
 	SDL_Surface* surface = this->CreateSurface(radius * 2 + 1, radius * 2 + 1);
 	//there is no need to lock the surface since it will never leave this scope
 
@@ -513,7 +511,7 @@ void GraphicsEngine::DrawLightSurface(LightTextureBakeData *lightBakeData, int w
 
 
 
-void GraphicsEngine::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *color, int width, int height, bool fill)
+void GraphicsEngine::DrawRectangleInSurface(SDL_Surface* surface, RGBA_Color *color, int width, int height, bool fill)
 {
 	SDL_LockSurface(surface);
 	memset(surface->pixels, 0, surface->pitch * surface->h);
@@ -541,7 +539,7 @@ void GraphicsEngine::DrawRectangleInSurface(SDL_Surface* surface, SDL_Color *col
 	SDL_UnlockSurface(surface);
 }
 
-void GraphicsEngine::DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color, int radius, bool fill) {
+void GraphicsEngine::DrawCircleInSurface(SDL_Surface* surface, RGBA_Color* color, int radius, bool fill) {
 
 	SDL_LockSurface(surface);
 	memset(surface->pixels, 0, surface->pitch * surface->h);
@@ -599,7 +597,7 @@ void GraphicsEngine::DrawCircleInSurface(SDL_Surface* surface, SDL_Color* color,
 	SDL_UnlockSurface(surface);
 }
 
-void GraphicsEngine::drawPointInSurface(SDL_Surface* surface, SDL_Color& color, int x, int y) {
+void GraphicsEngine::drawPointInSurface(SDL_Surface* surface, RGBA_Color& color, int x, int y) {
 	//no need to lock the surface since this function is only used when the surface is already locked
 	Uint8* target_pixel = (Uint8*)surface->pixels + y * surface->pitch + x * 4;
 	*target_pixel = color.r;
@@ -862,7 +860,7 @@ void GraphicsEngine::SetLightingQuality_Internal(LightingQuality quality) {
 		height = 1440;
 	}
 
-	/*SDL_Color color = { 0, 0, 0, 255 };
+	/*RGBA_Color color = { 0, 0, 0, 255 };
 	SDL_Surface* surface = this->CreateSurface(width, height);
 	DrawRectangleInSurface(surface, &color, width, height, true);*/
 
@@ -960,7 +958,7 @@ void GraphicsEngine::BlitTextSurface(EntityName fontAtlas, std::string text, int
 
 		//print the cursor
 		if (cursorPos == i) {
-			vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
+			vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (MATH_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (MATH_PI / 180.0)) };
 			GraphicsEngine::getInstance().BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
 		}
 
@@ -968,20 +966,20 @@ void GraphicsEngine::BlitTextSurface(EntityName fontAtlas, std::string text, int
 		double letterScale = letteSize.x / letteSize.y;
 		vector2 size = { letterScale * availableY, availableY };
 		delta.x += size.x / 2;
-		vector2 letterPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
+		vector2 letterPos = { pos.x + delta.x * std::cos(rot * (MATH_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (MATH_PI / 180.0)) };
 		GraphicsEngine::getInstance().BlitSurface(name, layer, letterPos, size, rot, TextureFlip::FLIP_NONE);
 
 		delta.x += size.x / 2;
 	}
 	//print the cursor
 	if (cursorPos == i) {
-		vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (M_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (M_PI / 180.0)) };
+		vector2 cursorPos = { pos.x + delta.x * std::cos(rot * (MATH_PI / 180.0)), pos.y + delta.y + delta.x * std::sin(rot * (MATH_PI / 180.0)) };
 		GraphicsEngine::getInstance().BlitSurface(cursorName, layer, cursorPos, cursorSize, rot, TextureFlip::FLIP_NONE);
 	}
 }
 
 
-void GraphicsEngine::SetBackgroundColor(SDL_Color& color) {
+void GraphicsEngine::SetBackgroundColor(RGBA_Color& color) {
 	this->_backgroundColor = color;
 }
 
@@ -1102,11 +1100,11 @@ void GraphicsEngine::Flip() {
 			double camera_obj_dist = sqrt((texture->pos.x - cameraPos.x) * (texture->pos.x - cameraPos.x)
 			+ (cameraPos.y - texture->pos.y) * (cameraPos.y - texture->pos.y));
 			//get the angle between the camera and the object
-			double angle = std::atan2<double>(texture->pos.y - cameraPos.y, texture->pos.x - cameraPos.x) * (180.0/M_PI);
+			double angle = std::atan2<double>(texture->pos.y - cameraPos.y, texture->pos.x - cameraPos.x) * (180.0/MATH_PI);
 			angle -= sdl2_cameraRotation;	//the object rotate in opposite direction from the camera prospective
 
-			vector2 textureScreenPos = { this->windowWidth / 2.0 + cameraToScreenScale.x * camera_obj_dist * std::cos(angle * (M_PI / 180.0)),
-										this->windowHeight / 2.0 - cameraToScreenScale.y * camera_obj_dist * std::sin(angle * (M_PI / 180.0)) };	//y is inverted on screen
+			vector2 textureScreenPos = { this->windowWidth / 2.0 + cameraToScreenScale.x * camera_obj_dist * std::cos(angle * (MATH_PI / 180.0)),
+										this->windowHeight / 2.0 - cameraToScreenScale.y * camera_obj_dist * std::sin(angle * (MATH_PI / 180.0)) };	//y is inverted on screen
 
 			//size of the rectangle of the texture (in pixel)
 			vector2 textureScreenRect = {texture->scale.x * cameraToScreenScale.x, texture->scale.y * cameraToScreenScale.y};
@@ -1174,11 +1172,11 @@ void GraphicsEngine::DrawLighting(vector2 cameraPos, vector2 cameraScale, double
 			}
 
 			//get the angle between the camera and the object
-			double angle = std::atan2<double>(lightData.position.y - cameraPos.y, lightData.position.x - cameraPos.x) * (180.0 / M_PI);
+			double angle = std::atan2<double>(lightData.position.y - cameraPos.y, lightData.position.x - cameraPos.x) * (180.0 / MATH_PI);
 			angle -= cameraRot;	//the object rotate in opposite direction from the camera prospective
 
-			vector2 textureScreenPos = { _lightingOverlaySize.x / 2.0 + cameraToScreenScale.x * camera_obj_dist * std::cos(angle * (M_PI / 180.0)),
-										_lightingOverlaySize.y / 2.0 - cameraToScreenScale.y * camera_obj_dist * std::sin(angle * (M_PI / 180.0)) };	//y is inverted on screen
+			vector2 textureScreenPos = { _lightingOverlaySize.x / 2.0 + cameraToScreenScale.x * camera_obj_dist * std::cos(angle * (MATH_PI / 180.0)),
+										_lightingOverlaySize.y / 2.0 - cameraToScreenScale.y * camera_obj_dist * std::sin(angle * (MATH_PI / 180.0)) };	//y is inverted on screen
 
 			//size of the rectangle of the texture (in pixel)
 			vector2 textureScreenRect = { 2 * lightData.lightRadius * cameraToScreenScale.x, 2 * lightData.lightRadius * cameraToScreenScale.y };
@@ -1263,7 +1261,7 @@ void GraphicsEngine::PointLightFilter(CustomFilterData &data) {
 	double scale = data.textureWidth / (lightdata->lightRadius * 2.0);
 	double distance = sqrt(data.x * data.x + data.y * data.y) / scale;
 	
-	double angle = atan2(data.y, data.x)*(180.0/PI);
+	double angle = atan2(data.y, data.x)*(180.0/MATH_PI);
 
 	data.pixelColor.r = lightdata->color.r;
 	data.pixelColor.g = lightdata->color.g;
@@ -1427,13 +1425,13 @@ void GraphicsEngine::drawEllipse(vector2 center, int32_t a, int32_t b){
 	}
 }
 
-void GraphicsEngine::CreateTextSurface(EntityName name, std::string text, TTF_Font* font, SDL_Color textColor, SDL_Color backgroundColor, vector2& size) {
+void GraphicsEngine::CreateTextSurface(EntityName name, std::string text, TTF_Font* font, RGBA_Color textColor, RGBA_Color backgroundColor, vector2& size) {
 
 	//Unfortunately TTF_RenderText_Shaded doesn't seems to work with opengles2 as driver
 	//so i have to manually create the text and the background
 
 	//create blended text texture
-	auto surfaceMessage = TTF_RenderText_Blended(font, text.c_str(), textColor);
+	auto surfaceMessage = TTF_RenderText_Blended(font, text.c_str(), { textColor.r, textColor.g, textColor.b, textColor.a });
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(this->_renderer, surfaceMessage); //now you can convert it into a texture
 
 	//create background texture
@@ -1502,7 +1500,7 @@ vector2 GraphicsEngine::GetTextSize(EntityName atlasName, std::string text, int 
 
 }
 
-void GraphicsEngine::LoadFontAtlas(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
+void GraphicsEngine::LoadFontAtlas(EntityName atlasName, RGBA_Color color, RGBA_Color backgroundColor, std::string fontName, long resolution) {
 	if (atlasName == 0) {
 		return;
 	}
@@ -1543,7 +1541,7 @@ void GraphicsEngine::LoadFontChar_Internal(fontCharCreation* fontCharData) {
 	vec.push_back({ name, size });
 }
 
-void GraphicsEngine::LoadFontAtlas_Internal(EntityName atlasName, SDL_Color color, SDL_Color backgroundColor, std::string fontName, long resolution) {
+void GraphicsEngine::LoadFontAtlas_Internal(EntityName atlasName, RGBA_Color color, RGBA_Color backgroundColor, std::string fontName, long resolution) {
 	char character[2] = "";
 	std::string fontCompleteName = "Fonts\\" + fontName + ".ttf";
 

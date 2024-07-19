@@ -4,6 +4,7 @@
 #include "gui_text.h"
 #include "graphics.h"
 #include "gameEngine.h"
+#include "sprite.h"
 
 GUI_Editbox::GUI_Editbox(EntityName objName, unsigned int elementCode, EntityName textureName, std::string hintText, EntityName textFontAlias, EntityName hintFontAlias,
 	vector2 pos, vector2 scale, int layer) {

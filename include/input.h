@@ -6,6 +6,7 @@
 #include <array>
 #include <atomic>
 #include <mutex>
+#include <vector>
 
 struct vector2;
 
@@ -25,7 +26,7 @@ public:
     InputEngine(const InputEngine&) = delete;
     InputEngine& operator=(const InputEngine&) = delete;
 
-	Init();
+	void Init();
 
 	//set the state of a key or a mouse button
 	void beginNewFrame();
@@ -56,8 +57,8 @@ public:
 	InputEvent GetLastEvent();
 
 private:
-	InputEngine() = default;
-	~InputEngine() = default;
+	InputEngine();
+	~InputEngine();
 
 	std::array <std::atomic <bool>, SDL_Scancode::SDL_NUM_SCANCODES> _heldKeys;
 	std::array <std::atomic <bool>, SDL_Scancode::SDL_NUM_SCANCODES> _pressedKeys;
