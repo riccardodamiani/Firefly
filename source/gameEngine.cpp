@@ -3,7 +3,6 @@
 #include "gameObject.h"
 #include "graphics.h"
 #include "structures.h"
-#include "game.h"
 #include "input.h"
 #include "variables.h"
 #include "audio.h"
@@ -62,10 +61,16 @@ GameEngine::GameEngine(){
 	distribution = new std::uniform_int_distribution<long long unsigned>(1, 0xFFFFFFFFFFFFFFFF);
 }
 
+GameEngine::~GameEngine() {
 
-void GameEngine::GameEngine_Start(GraphicsOptions& g_options, AudioOptions& a_options) {
+}
+
+
+void GameEngine::GameEngine_Start(void (*GameInit)(), GraphicsOptions& g_options, AudioOptions& a_options) {
+	if (!GameInit)
+		return;
 	Init_Engines(g_options, a_options);
-	InitGame();
+	GameInit();
 
 	_helperManager = new MultithreadManager(_helperCount);
 

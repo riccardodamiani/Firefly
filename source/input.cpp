@@ -8,6 +8,12 @@
 #include <atomic>
 
 InputEngine::InputEngine() {
+
+}
+
+
+InputEngine::~InputEngine() {
+
 }
 
 void InputEngine::Init(){

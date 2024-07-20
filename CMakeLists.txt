@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(FireflyEngine)
+project(FireflyLib)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,8 +17,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(SDL2)
-
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # sdl2_image
 FetchContent_Declare(
@@ -49,7 +47,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL2_TTF)
 
 # Create the static library
-add_library(FireflyEngine STATIC
+add_library(FireflyLib SHARED
   source/AnimatedSprite.cpp
   source/animation.cpp
   source/audio_source.cpp
@@ -78,16 +76,26 @@ add_library(FireflyEngine STATIC
   source/threadHelper.cpp
   source/variables.cpp
 )
-target_include_directories(FireflyEngine PUBLIC
+#target_compile_definitions(FireflyLib PRIVATE ENGINE_API=__attribute__((visibility("default"))))
+
+target_link_libraries(FireflyLib
+  SDL2
+  SDL2_mixer
+  SDL2_image
+  SDL2_ttf
+)
+
+target_include_directories(FireflyLib PUBLIC
   ${SDL2_SOURCE_DIR}/include
   ${SDL2_mixer_SOURCE_DIR}/include
   ${SDL2_image_SOURCE_DIR}/include
   ${SDL2_ttf_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(FireflyEngine PRIVATE
-  SDL2-static
-  SDL2_mixer
-  SDL2_image
-  SDL2_ttf
+# Set the library output path
+set_target_properties(FireflyLib PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
+
+# Export compile commands for use with other projects
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

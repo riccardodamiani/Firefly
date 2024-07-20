@@ -4,11 +4,13 @@
 #include "variables.h"
 #include "gameObject.h"
 #include "gui.h"
+#include "engine_exports.h"
+
 #include <mutex>
 
 class GUI_Text;
 
-class GUI_Element : public GameObject {
+class ENGINE_API GUI_Element : public GameObject {
 public:
 	/*GUI_Element contructor are deprecated. Use Specific element constructor instead*/
 	GUI_Element();

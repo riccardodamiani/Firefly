@@ -16,6 +16,10 @@ PhysicsEngine::PhysicsEngine() {
 	_firstStatic = 0;
 }
 
+PhysicsEngine::~PhysicsEngine() {
+
+}
+
 void PhysicsEngine::RegisterRigidbody(Rigidbody* body) {
 	std::lock_guard <std::mutex> guard(_update_mutex);
 	if (body->IsStatic()) {

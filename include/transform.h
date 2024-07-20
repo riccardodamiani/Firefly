@@ -3,6 +3,7 @@
 
 #include "structures.h"
 #include "variables.h"
+
 #include <mutex>
 #include <math.h>
 

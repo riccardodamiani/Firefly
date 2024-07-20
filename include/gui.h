@@ -6,6 +6,8 @@
 #include <vector>
 #include <atomic>
 
+#include "engine_exports.h"
+
 class Input;
 class GUI_Element;
 
@@ -30,7 +32,7 @@ typedef struct action {
 	GuiAction action;
 }Action;
 
-class GUIEngine {
+class ENGINE_API GUIEngine {
 public:
 	static GUIEngine& getInstance() {
         static GUIEngine instance;

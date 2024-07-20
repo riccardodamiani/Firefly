@@ -3,8 +3,9 @@
 
 #include "gui_element.h"
 #include "entity.h"
+#include "engine_exports.h"
 
-class GUI_Button : public GUI_Element {
+class ENGINE_API GUI_Button : public GUI_Element {
 public:
 	GUI_Button(EntityName objectName, EntityName textureName, unsigned int elementCode, vector2 pos, vector2 rect, int layer);
 	void update(double elapsedTime);

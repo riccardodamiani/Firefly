@@ -5,10 +5,11 @@
 #include "gui_panel.h"
 #include "gui_element.h"
 #include "entity.h"
+#include "engine_exports.h"
 
 #include <vector>
 
-class GUI_Droplist : public GUI_Element {
+class ENGINE_API GUI_Droplist : public GUI_Element {
 public:
 	GUI_Droplist(EntityName objectName, unsigned int elementCode, EntityName mainTexture, EntityName background_texture,
 		EntityName fontAlias, double textStartOffset, vector2 pos, vector2 scale, int layer);

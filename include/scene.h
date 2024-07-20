@@ -4,8 +4,9 @@
 #include "gui.h"
 #include "gui_element.h"
 #include "gameEngine_structs.h"
+#include "engine_exports.h"
 
-class Scene {
+class ENGINE_API Scene {
 public:
 	[[deprecated]] Scene();	//always use the Scene(unsigned int) contructor
 	Scene(unsigned int id);

@@ -2,6 +2,8 @@
 #define GLOBAL_VARIABLE_H
 
 #include "structures.h"
+#include "engine_exports.h"
+
 #include <atomic>
 #include <mutex>
 #include <memory>
@@ -12,7 +14,7 @@
 //a variable - so you have two variables pointing to the same object - if one is deleted the other one is still safe to work with.
 //This is a good property to have for global game variables and variable animations
 
-class Variable {
+class ENGINE_API Variable {
 public:
 	Variable();
 protected:
@@ -20,7 +22,7 @@ protected:
 };
 
 
-class Bool : public Variable {
+class ENGINE_API Bool : public Variable {
 public:
 	Bool();
 	Bool(bool val);
@@ -48,7 +50,7 @@ private:
 };
 
 
-class Int : public Variable {
+class ENGINE_API Int : public Variable {
 public:
 	Int();
 	Int(long val);
@@ -103,7 +105,7 @@ private:
 
 
 
-class UInt : public Variable {
+class ENGINE_API UInt : public Variable {
 public:
 	UInt();
 	UInt(unsigned long val);
@@ -156,7 +158,7 @@ private:
 };
 
 
-class Void_Ptr : public Variable {
+class ENGINE_API Void_Ptr : public Variable {
 public:
 	Void_Ptr();
 	Void_Ptr(void *ptr);
@@ -185,7 +187,7 @@ private:
 
 
 
-class Double : public Variable {
+class ENGINE_API Double : public Variable {
 public:
 	Double();
 	Double(double val);
@@ -232,7 +234,7 @@ private:
 	std::shared_ptr <std::atomic<double>> value;
 };
 
-class Vector2 : public Variable {
+class ENGINE_API Vector2 : public Variable {
 public:
 	Vector2();
 	Vector2(vector2 val);

@@ -10,12 +10,13 @@
 
 #include "audio_source.h"
 #include "entity.h"
+#include "engine_exports.h"
 
 struct Mix_Chunk;
 struct _Mix_Music;
 typedef struct _Mix_Music Mix_Music;
 
-class AudioEngine {
+class ENGINE_API AudioEngine {
 	enum class AudioRequest {
 		PLAY_AUDIOTRACK,
 		PLAY_MUSIC,

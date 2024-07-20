@@ -5,6 +5,7 @@
 #include "structures.h"
 #include "variables.h"
 #include "entity.h"
+#include "engine_exports.h"
 
 #include <vector>
 
@@ -26,7 +27,7 @@ struct LightObjectData {
 	double parab_a, parab_b, parab_c;
 };
 
-class LightObject : public GameObject{
+class ENGINE_API LightObject : public GameObject{
 public:
 	LightObject(EntityName name, vector2 position, double rotation, LightObject* originalLight);
 	LightObject(EntityName name, vector2 position, double rotation, double power, double lightAngle, RGBA_Color color, LightType type);

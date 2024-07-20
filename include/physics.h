@@ -5,8 +5,9 @@
 #include <mutex>
 #include "structures.h"
 #include "physics_structs.h"
+#include "engine_exports.h"
 
-class PhysicsEngine {
+class ENGINE_API PhysicsEngine {
 public:
     static PhysicsEngine& getInstance() {
         static PhysicsEngine instance;

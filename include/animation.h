@@ -7,8 +7,9 @@
 #include "structures.h"
 #include "variables.h"
 #include "transform.h"
+#include "engine_exports.h"
 
-class Animation {
+class ENGINE_API Animation {
 public:
 	enum class PlayMode {
 		SINGLE,			//play the animation once. The variable is left with the final value

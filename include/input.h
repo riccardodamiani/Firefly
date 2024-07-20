@@ -9,6 +9,7 @@
 
 #include "scancode.h"
 #include "gameEvent.h"
+#include "engine_exports.h"
 
 struct vector2;
 union SDL_Event;
@@ -19,7 +20,7 @@ enum class InputEvent {
 	QUIT_APP
 };
 
-class InputEngine {
+class ENGINE_API InputEngine {
 public:
 	static InputEngine& getInstance() {
         static InputEngine instance;

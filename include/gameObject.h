@@ -6,6 +6,7 @@
 #include "rigidbody.h"
 #include "entity.h"
 #include "transform.h"
+#include "engine_exports.h"
 
 #include <vector>
 #include <atomic>
@@ -14,7 +15,7 @@ class Sprite;
 class AnimatedSprite;
 class Animation;
 
-class GameObject {
+class ENGINE_API GameObject {
 public:
 	
 	GameObject();

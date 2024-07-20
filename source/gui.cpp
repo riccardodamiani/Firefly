@@ -8,7 +8,6 @@
 #include "gui_editbox.h"
 #include "graphics.h"
 #include "structures.h"
-#include "game.h"
 
 #include <map>
 #include <mutex>
@@ -17,6 +16,9 @@ GUIEngine::GUIEngine() {
 	
 }
 
+GUIEngine::~GUIEngine() {
+
+}
 
 void GUIEngine::RegisterGuiAction(GuiAction action, GUI_Element* element) {
 	std::lock_guard <std::mutex> guard(update_mutex);

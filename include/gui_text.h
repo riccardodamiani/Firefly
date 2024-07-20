@@ -3,10 +3,10 @@
 
 #include "gui_element.h"
 #include "entity.h"
-
+#include "engine_exports.h"
 #include "structures.h"
 
-class GUI_Text : public GUI_Element {
+class ENGINE_API GUI_Text : public GUI_Element {
 public:
 	GUI_Text(EntityName objectName, unsigned int elementCode, EntityName atlasName, vector2 pos, vector2 scale, int layer);
 	~GUI_Text();

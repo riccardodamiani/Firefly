@@ -8,6 +8,7 @@
 #include "entity.h"
 #include "game_options.h"
 #include "gameEngine_structs.h"
+#include "engine_exports.h"
 
 #include <vector>
 #include <mutex>
@@ -32,7 +33,7 @@ class LightObject;
 class Scene;
 class GUI_Element;
 
-class GameEngine {
+class ENGINE_API GameEngine {
 	enum class GameEngineRequestType {
 		LOAD_SCENE,
 		REGISTER_GAME_OBJECT,
@@ -74,7 +75,7 @@ public:
     GameEngine(const GameEngine&) = delete;
     GameEngine& operator=(const GameEngine&) = delete;
 
-	void GameEngine_Start(GraphicsOptions& g_options, AudioOptions& a_options);
+	void GameEngine_Start(void (*GameInit)(), GraphicsOptions& g_options, AudioOptions& a_options);
 
 	uint32_t posToZone(vector2 pos);
 	int zoneDistance(uint32_t zone1, uint32_t zone2);
