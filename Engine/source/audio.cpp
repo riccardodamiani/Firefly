@@ -86,12 +86,23 @@ void AudioEngine::loadSoundFileInFolder(std::string directory) {
 			else {
 				name.assign(filename);
 			}
+#ifdef _WIN32
 			index = name.find_last_of('\\') + 1;
+#else
+			index = name.find_last_of('/') + 1;
+#endif
 			if (index != std::string::npos) {
 				name = name.substr(index, name.size());
 			}
 			//load the sound file
-			if (directory == "Sound\\Music") {		//is loading a soundtrack file
+#ifdef _WIN32
+			std::string music_folder = "Sound\\Music";
+			std::string tracks_folder = "Sound\\Tracks";
+#else
+			std::string music_folder = "Sound/Music";
+			std::string tracks_folder = "Sound/Tracks";
+#endif
+			if (directory == music_folder) {		//is loading a soundtrack file
 				Mix_Music* music = Mix_LoadMUS(filename.c_str());
 				if (music != NULL) {
 					EntityName ename = DecodeName(name.c_str());
@@ -101,7 +112,7 @@ void AudioEngine::loadSoundFileInFolder(std::string directory) {
 					std::cout << "Cannot load soundtrack track " << filename.c_str() << std::endl;
 				}
 			}
-			else if (directory == "Sound\\Tracks") {		//is loading a audio file
+			else if (directory == tracks_folder) {		//is loading a audio file
 				Mix_Chunk* effect = Mix_LoadWAV(filename.c_str());
 				if (effect != NULL) {
 					EntityName ename = DecodeName(name.c_str());

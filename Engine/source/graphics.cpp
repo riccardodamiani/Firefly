@@ -1552,7 +1552,11 @@ void GraphicsEngine::LoadFontChar_Internal(fontCharCreation* fontCharData) {
 
 void GraphicsEngine::LoadFontAtlas_Internal(EntityName atlasName, RGBA_Color color, RGBA_Color backgroundColor, std::string fontName, long resolution) {
 	char character[2] = "";
+#ifdef _WIN32
 	std::string fontCompleteName = "Fonts\\" + fontName + ".ttf";
+#else
+	std::string fontCompleteName = "Fonts/" + fontName + ".ttf";
+#endif
 
 	if (_fontsRef.find(atlasName) != _fontsRef.end())	//if already exist
 		return;
