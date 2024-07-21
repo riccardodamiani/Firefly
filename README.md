@@ -23,11 +23,11 @@ mkdir SDL-mixer
 mkdir SDL-ttf
 cd ..
 ```
-* Download the SDL development packages and unpack them inside the relative folders in third-party
-[SDL](https://github.com/libsdl-org/SDL/releases/download/release-2.30.5/SDL2-devel-2.30.5-VC.zip)
-[SDL-image](https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.2/SDL2_image-devel-2.8.2-VC.zip)
-[SDL-mixer](https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.0/SDL2_mixer-devel-2.8.0-VC.zip)
-[SDL-ttf](https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-devel-2.22.0-VC.zip)
+* Download the SDL development packages and unpack them inside the relative folders in third-party:
+    * [SDL](https://github.com/libsdl-org/SDL/releases/download/release-2.30.5/SDL2-devel-2.30.5-VC.zip)
+    * [SDL-image](https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.2/SDL2_image-devel-2.8.2-VC.zip)
+    * [SDL-mixer](https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.0/SDL2_mixer-devel-2.8.0-VC.zip)
+    * [SDL-ttf](https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-devel-2.22.0-VC.zip)
 * Run CMake
 ```
 mkdir build
