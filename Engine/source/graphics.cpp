@@ -658,9 +658,9 @@ void GraphicsEngine::LoadTextureGroup(const char *groupName) {
 	std::string str_textureGroup = groupName;
 	EntityName groupCode = DecodeName(groupName);
 #ifdef _WIN32
-	std::string folder = "Data\\GraphicsEngine\\" + str_textureGroup;
+	std::string folder = "Graphics\\" + str_textureGroup;
 #else
-	std::string folder = "Data/GraphicsEngine/" + groupName;
+	std::string folder = "Graphics/" + groupName;
 #endif
 	LoadFromDir(folder, groupCode);
 }
