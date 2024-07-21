@@ -8,7 +8,7 @@
 #include "entity.h"
 #include "game_options.h"
 #include "gameEngine_structs.h"
-#include "engine_exports.h"
+
 
 #include <vector>
 #include <mutex>
@@ -33,7 +33,7 @@ class LightObject;
 class Scene;
 class GUI_Element;
 
-class ENGINE_API GameEngine {
+class GameEngine {
 	enum class GameEngineRequestType {
 		LOAD_SCENE,
 		REGISTER_GAME_OBJECT,

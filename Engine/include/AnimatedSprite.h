@@ -3,13 +3,13 @@
 
 #include "sprite.h"
 #include "variables.h"
-#include "engine_exports.h"
+
 
 #include <vector>
 #include <atomic>
 #include <mutex>
 
-class ENGINE_API AnimatedSprite {
+class AnimatedSprite {
 public:
 	AnimatedSprite(const std::string &imageName, double playTime, unsigned int totalFrames, bool repeat, bool stepByStep, int screenLayer, TextureFlip flip = TextureFlip::FLIP_NONE);
 	~AnimatedSprite();

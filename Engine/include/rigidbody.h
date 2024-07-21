@@ -8,11 +8,11 @@
 #include "structures.h"
 #include "physics_structs.h"
 #include "variables.h"
-#include "engine_exports.h"
+
 
 class GameObject;
 
-class ENGINE_API Rigidbody {
+class Rigidbody {
 
 public:
 	Rigidbody(GameObject *parent, std::vector <vector2>& vertexes);

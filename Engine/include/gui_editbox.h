@@ -4,12 +4,12 @@
 #include "gui_element.h"
 #include "variables.h"
 #include "entity.h"
-#include "engine_exports.h"
+
 
 #include <mutex>
 class Sprite;
 
-class ENGINE_API GUI_Editbox : public GUI_Element {
+class GUI_Editbox : public GUI_Element {
 public:
 	GUI_Editbox(EntityName objName, unsigned int elementCode, EntityName textureName, std::string hintText, EntityName textFontAlias, EntityName hintFontAlias,
 		vector2 pos, vector2 scale, int layer);

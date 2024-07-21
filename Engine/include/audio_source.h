@@ -7,7 +7,7 @@
 
 #include "gameObject.h"
 #include "entity.h"
-#include "engine_exports.h"
+
 
 //Audio sources are used to keep ownership of a audio track (effect, ui effect or dialog sound). This is useful to be able to play, pause and stop a 
 //track or to know the status of a audio track.
@@ -21,7 +21,7 @@ enum AudioStatus {
 	AUDIO_STATUS_FINISHED	//finished: doesn't own the channel anymore
 };
 
-class ENGINE_API AudioSource : public GameObject {
+class AudioSource : public GameObject {
 public:
 	AudioSource(EntityName name, std::string trackName, uint16_t audioGroup, double maxDistance, bool spatial_sound);
 	~AudioSource();

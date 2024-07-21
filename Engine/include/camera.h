@@ -3,14 +3,14 @@
 
 #include "gameObject.h"
 #include "structures.h"
-#include "engine_exports.h"
+
 
 #include <mutex>
 #include <atomic>
 
 
 
-class ENGINE_API Camera : public GameObject {
+class Camera : public GameObject {
 	struct rot_shake_struct {
 		double blendOutTime;
 		vector2 oscillation;

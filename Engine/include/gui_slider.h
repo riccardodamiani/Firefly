@@ -4,13 +4,13 @@
 #include "gui_element.h"
 #include "entity.h"
 #include "variables.h"
-#include "engine_exports.h"
+
 
 #include <vector>
 
 class AnimatedSprite;
 
-class ENGINE_API GUI_Slider : public GUI_Element {
+class GUI_Slider : public GUI_Element {
 public:
 	GUI_Slider(EntityName objectName, unsigned int elementCode, std::vector <AnimatedSprite*>&, vector2 pos, vector2 rect,
 				double minSliderVal, double maxSliderVal, double minResponseRange, 

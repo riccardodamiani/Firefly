@@ -7,9 +7,9 @@
 
 #include "graphics_structs.h"
 #include "entity.h"
-#include "engine_exports.h"
 
-class ENGINE_API Sprite {
+
+class Sprite {
 public:
 	Sprite(unsigned int screenLayer, EntityName imageName = 0, TextureFlip flip = TextureFlip::FLIP_NONE);
 	virtual ~Sprite();

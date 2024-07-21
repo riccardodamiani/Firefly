@@ -13,7 +13,7 @@
 #include "entity.h"
 #include "game_options.h"
 #include "graphics_structs.h"
-#include "engine_exports.h"
+
 
 struct SDL_Texture;
 struct SDL_Surface;
@@ -22,7 +22,7 @@ struct SDL_Renderer;
 struct _TTF_Font;
 typedef struct _TTF_Font TTF_Font;
 
-class ENGINE_API GraphicsEngine {
+class GraphicsEngine {
 	//some internal structures
 	typedef struct textureObject {
 		EntityName textureName;
