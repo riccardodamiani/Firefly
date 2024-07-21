@@ -19,7 +19,7 @@ public:
 	std::string getText();
 	int getTextLen();
 	void deleteChar(int charIndex);
-	vector2 GUI_Text::getCursorPosition(int cursorIndex);
+	vector2 getCursorPosition(int cursorIndex);
 	void ShowCursor(bool show);
 	void SetCursorPos(int pos);
 

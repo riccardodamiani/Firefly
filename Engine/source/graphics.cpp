@@ -14,6 +14,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
@@ -660,7 +661,7 @@ void GraphicsEngine::LoadTextureGroup(const char *groupName) {
 #ifdef _WIN32
 	std::string folder = "Graphics\\" + str_textureGroup;
 #else
-	std::string folder = "Graphics/" + groupName;
+	std::string folder = "Graphics/" + str_textureGroup;
 #endif
 	LoadFromDir(folder, groupCode);
 }

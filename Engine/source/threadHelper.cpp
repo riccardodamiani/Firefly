@@ -8,7 +8,7 @@ ThreadHelper::ThreadHelper(MultithreadManager* boss, int helperID){
 	this->_killThread = false;
 	this->_waitVariable = false;
 	//this->thrMutex.lock();
-	this->thr = std::thread::thread([this] {this->workThread();});
+	this->thr = std::thread([this] {this->workThread();});
 	this->thr.detach();
 }
 

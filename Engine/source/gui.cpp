@@ -1,4 +1,4 @@
-#include "GUI.h"
+#include "gui.h"
 #include "input.h"
 #include "gui_element.h"
 #include "gui_button.h"
