@@ -8,12 +8,12 @@ It's a tiny game engine based on SDL.
 
 # Build for Windows
 * Clone the repository
-* Inside the folder create a third-party folder as follow
-third-party
-├── SDL
-├── SDL-image
-├── SDL-mixer
-├── SDL-ttf
+* Inside the folder create a third-party folder as follow:  
+third-party  
+├── SDL  
+├── SDL-image  
+├── SDL-mixer  
+├── SDL-ttf  
 ```
 mkdir third-party
 cd third-party
@@ -45,17 +45,17 @@ To run the game you need to copy all the .dll files from the following folders:
 * third-party/SDL-mixer/lib/x64/optional/
 * third-party/SDL-ttf/lib/x64/
 to the same folder of the game executable.  
-Also, you need to create the data folders for the game. So the final look of the game folder should be:
-Game folder
-├── game.exe
-├── SDL.dll
-├── SDL_image.dll
-├── ...dll
-├── Graphics/
-├── Sound/
-├── ├── Music/
-├── ├── Tracks/
-├── Fonts/
+Also, you need to create the data folders for the game. So the final look of the game folder should be:  
+Game folder  
+├── game.exe  
+├── SDL.dll  
+├── SDL_image.dll  
+├── ...dll  
+├── Graphics/  
+├── Sound/  
+├── ├── Music/  
+├── ├── Tracks/  
+├── Fonts/  
 
 # Run the demo project
 The demo project uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/get/family/974o8)
