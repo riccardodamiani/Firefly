@@ -1,6 +1,6 @@
 # MyProject/GameEngine/CMakeLists.txt
 cmake_minimum_required(VERSION 3.16)
-project(GameEngine)
+project(FireflyEngine)
 
 # Require C++17 standard
 set(CMAKE_CXX_STANDARD 17)
@@ -14,7 +14,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
 # Add the source files for the game engine
-add_library(GameEngine STATIC
+add_library(FireflyEngine STATIC
     source/AnimatedSprite.cpp
     source/animation.cpp
     source/audio_source.cpp
@@ -45,7 +45,7 @@ add_library(GameEngine STATIC
 )
 
 # Include directories for SDL2
-target_include_directories(GameEngine PRIVATE
+target_include_directories(FireflyEngine PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_IMAGE_INCLUDE_DIRS}
     ${SDL2_TTF_INCLUDE_DIRS}
@@ -54,7 +54,7 @@ target_include_directories(GameEngine PRIVATE
 )
 
 # Link SDL2 libraries
-target_link_libraries(GameEngine PRIVATE
+target_link_libraries(FireflyEngine PRIVATE
     ${SDL2_LIBRARIES}
     ${SDL2_IMAGE_LIBRARIES}
     ${SDL2_TTF_LIBRARIES}

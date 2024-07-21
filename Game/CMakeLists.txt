@@ -1,6 +1,6 @@
 # MyProject/Game/CMakeLists.txt
 cmake_minimum_required(VERSION 3.16)
-project(Game)
+project(fireflyDemo)
 
 # Require C++17 standard
 set(CMAKE_CXX_STANDARD 17)
@@ -15,13 +15,13 @@ set(GAME_SRC
 )
 
 # Create the executable
-add_executable(Game ${GAME_SRC})
+add_executable(fireflyDemo ${GAME_SRC})
 
 # Include directories for the game
-target_include_directories(Game PRIVATE
+target_include_directories(fireflyDemo PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Engine/include # Include the GameEngine headers
 )
 
 # Link the game with the game engine
-target_link_libraries(Game PRIVATE GameEngine)
+target_link_libraries(fireflyDemo PRIVATE FireflyEngine)
