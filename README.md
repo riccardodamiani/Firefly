@@ -43,7 +43,7 @@ To run the game you need to copy all the .dll files from the following folders:
 * third-party/SDL-image/lib/x64/optional/
 * third-party/SDL-mixer/lib/x64/
 * third-party/SDL-mixer/lib/x64/optional/
-* third-party/SDL-ttf/lib/x64/
+* third-party/SDL-ttf/lib/x64/  
 to the same folder of the game executable.  
 Also, you need to create the data folders for the game. So the final look of the game folder should be:  
 Game folder/  
