@@ -224,7 +224,8 @@ std::pair<int, int> InputEngine::getMousePosition() {
 }
 
 std::pair<int, int> InputEngine::getLastWheelMoviment() {
-	return this->_lastWheelMoviment;
+	mouseWheelMove wheel_mov = _lastWheelMoviment.load();
+	return std::pair<int, int>(wheel_mov.x, wheel_mov.y);
 }
 
 //gets called if the mouse moves

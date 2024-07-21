@@ -21,6 +21,9 @@ enum class InputEvent {
 };
 
 class InputEngine {
+	struct mouseWheelMove{
+		int x, y;
+	};
 public:
 	static InputEngine& getInstance() {
         static InputEngine instance;
@@ -75,7 +78,7 @@ private:
 	std::atomic <int> _lastMousePositionX;
 	std::atomic <int> _lastMousePositionY;
 	std::atomic <bool> _didMouseWheelMove;
-	std::atomic <std::pair <int, int>> _lastWheelMoviment;
+	std::atomic <mouseWheelMove> _lastWheelMoviment;
 	std::atomic <bool> _didMouseMove;
 	std::atomic <EventType> _lastEvent;
 	std::vector <InputEvent> _inputPoll;
