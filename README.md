@@ -1,15 +1,15 @@
-## Firefly Engine
+# Firefly Engine
 It's a tiny game engine based on SDL. 
 
-# Requirements
+## Requirements
 * SDL, SDL image, SDL mixer, SDL ttf
 * CMake
 * C++ compiler (Visual Studio, g++)
 
-# Build for Windows
+## Build for Windows
 * Clone the repository
 * Inside the folder create a third-party folder as follow:  
-third-party  
+third-party/  
 ├── SDL  
 ├── SDL-image  
 ├── SDL-mixer  
@@ -36,7 +36,7 @@ cmake ..
 * Open the visual studio project in the build/ folder
 * Compile the project
 
-# Run on Windows
+## Run on Windows
 To run the game you need to copy all the .dll files from the following folders:
 * third-party/SDL/lib/x64/
 * third-party/SDL-image/lib/x64/
@@ -46,7 +46,7 @@ To run the game you need to copy all the .dll files from the following folders:
 * third-party/SDL-ttf/lib/x64/
 to the same folder of the game executable.  
 Also, you need to create the data folders for the game. So the final look of the game folder should be:  
-Game folder  
+Game folder/  
 ├── game.exe  
 ├── SDL.dll  
 ├── SDL_image.dll  
@@ -57,6 +57,6 @@ Game folder
 ├── ├── Tracks/  
 ├── Fonts/  
 
-# Run the demo project
-The demo project uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/get/family/974o8)
+## Run the demo project
+The demo project uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/get/family/974o8).  
 Put the ttf file in the Fonts/ folder of the game folder named as Branda.ttf
