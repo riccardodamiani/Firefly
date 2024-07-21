@@ -20,7 +20,6 @@ add_library(FireflyEngine STATIC
     source/audio_source.cpp
     source/audio.cpp
     source/camera.cpp
-    source/entity.cpp
     source/gameEngine.cpp
     source/gameObject.cpp
     source/graphics.cpp
