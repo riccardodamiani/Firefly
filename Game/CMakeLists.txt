@@ -10,10 +10,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Source files
 set(GAME_SRC
     source/main.cpp
-    source/light_scene.cpp
-    source/falling_obj_scene.cpp
-    source/projectile.cpp
-    source/test_class.cpp
+    source/firefly_scene.cpp
+    source/firefly.cpp
 )
 
 # Create the executable

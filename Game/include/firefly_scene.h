@@ -1,5 +1,5 @@
-#ifndef FALLING_SCENE_H
-#define FALLING_SCENE_H
+#ifndef FIREFLY_SCENE_H
+#define FIREFLY_SCENE_H
 
 #include "scene.h"
 #include "gameEngine.h"
@@ -7,15 +7,13 @@
 
 #include <memory>
 
-class FallingObjScene : public Scene {
+class FireflyScene : public Scene {
 public:
-	FallingObjScene(unsigned int id);
+	FireflyScene(unsigned int id);
 	void onload();
 	void onfree();
 	void scene_callback(GameEvent event, double timeElapsed);
 	void gui_listener(GUI_Element* element, GuiAction action);
-	AudioSource *_audioTest;
-	bool loading_scene;
 };
 
-#endif
+#endif  //FIREFLY_SCENE_H
