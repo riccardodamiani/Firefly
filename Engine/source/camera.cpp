@@ -2,6 +2,7 @@
 #include "gameEngine.h"
 #include "gameObject.h"
 #include "animation.h"
+#include "entity.h"
 
 Camera::Camera(vector2 cameraSize, vector2 position, double rotation) {
 	transform.position = position;

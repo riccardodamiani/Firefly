@@ -11,6 +11,8 @@ const int ALIGN_BOTTOM = 4;
 
 #include <vector>
 #include <stdint.h>
+#include <string.h>
+#include <math.h>
 
 #define MATH_PI 3.14159265358979323846264f
 
