@@ -945,7 +945,13 @@ void GraphicsEngine::BlitTextSurface(EntityName fontAtlas, std::string text, int
 	vector2 cSize = ref[(unsigned char)'|'].size;
 	vector2 cursorSize = { (cSize.x/ cSize.y) * availableY * 0.7, availableY * 1.2 };
 
-	vector2 delta = { - scale.x / 2, 0 };
+	double x_final_size = 0;
+	for (int i = 0; i < text.size(); i++) {
+		vector2 letteSize = ref[(unsigned char)text.at(i)].size;
+		double letterScale = letteSize.x / letteSize.y;
+		x_final_size += letterScale * availableY;
+	}
+	vector2 delta = { -x_final_size / 2, 0 };
 	int i = 0;
 	for (i; i < text.size(); i++) {
 		EntityName name = ref[(unsigned char)text.at(i)].name;
