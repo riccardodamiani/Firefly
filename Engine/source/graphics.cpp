@@ -1438,6 +1438,8 @@ void GraphicsEngine::CreateTextSurface(EntityName name, std::string text, TTF_Fo
 
 	//create blended text texture
 	auto surfaceMessage = TTF_RenderText_Blended(font, text.c_str(), { textColor.r, textColor.g, textColor.b, textColor.a });
+	if (!surfaceMessage)
+		return;
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(this->_renderer, surfaceMessage); //now you can convert it into a texture
 
 	//create background texture
