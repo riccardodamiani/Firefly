@@ -17,7 +17,6 @@ Rigidbody::Rigidbody(GameObject* parent, std::vector <vector2> &vertexes) {
 	useGravity = true;
 	isTrigger = false;
 	constraints = RBContraints::NO_CONST;
-
 	detectCollisions = true;
 	_mesh.v = vertexes;
 	_world_mesh.v = vertexes;
@@ -33,6 +32,10 @@ Rigidbody::Rigidbody(GameObject* parent, std::vector <vector2> &vertexes) {
 	isStatic = false;
 
 	groupMask = 0xffffffff;
+
+	frameForce = { 0, 0 };
+	momentOfInertia = 0;
+	_meshUpdated = false;
 
 	PhysicsEngine::getInstance().RegisterRigidbody(this);
 }
