@@ -13,6 +13,8 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
+INCLUDE(CheckCXXSourceCompiles)
+
 # Add the source files for the game engine
 add_library(FireflyEngine STATIC
     source/AnimatedSprite.cpp
@@ -51,6 +53,54 @@ target_include_directories(FireflyEngine PRIVATE
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+
+set(ATOMIC32_TEST_CODE "
+    #include <atomic>
+    #include <stdint.h>
+    int main() {
+        std::atomic<int32_t> x;
+        x.store(1);
+        x--;
+        return x.load();
+    }")
+
+set(ATOMIC64_TEST_CODE "
+    #include <atomic>
+    #include <stdint.h>
+    int main() {
+        std::atomic<int64_t> x;
+        x.store(1);
+        x--;
+        return x.load();
+    }")
+
+set(ATOMIC128_TEST_CODE "
+    #include <atomic>
+    #include <stdint.h>
+    struct vector2{
+        unsigned long long x;
+        unsigned long long y;
+    };
+    int main() {
+        std::atomic<vector2> x;
+        x.store({1, 1});
+        return x.load().x;
+    }")
+
+macro(ATOMIC_CHECK)
+    # test whether atomic works
+    check_cxx_source_compiles("${ATOMIC32_TEST_CODE}" atomic32_test)
+    check_cxx_source_compiles("${ATOMIC64_TEST_CODE}" atomic64_test)
+    check_cxx_source_compiles("${ATOMIC128_TEST_CODE}" atomic128_test)
+
+    # if doesn't work, link atomic
+    if(NOT atomic32_test OR NOT atomic64_test OR NOT atomic128_test)
+        target_link_libraries(FireflyEngine PRIVATE atomic)
+    endif()
+endmacro()
+
+ATOMIC_CHECK()
 
 # Link SDL2 libraries
 target_link_libraries(FireflyEngine PRIVATE
