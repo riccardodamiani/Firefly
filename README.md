@@ -1,5 +1,5 @@
 # Firefly Engine
-It's a tiny game engine based on SDL. 
+It's a tiny cross-platform game engine based on SDL. 
 
 ## Requirements
 * SDL, SDL image, SDL mixer, SDL ttf
@@ -36,7 +36,7 @@ cmake ..
 * Open the visual studio project in the build/ folder
 * Compile the project
 
-## Run on Windows
+## Run the game on Windows
 To run the game you need to copy all the .dll files from the following folders and put them in the same folder of the game executable:
 * third-party/SDL/lib/x64/
 * third-party/SDL-image/lib/x64/
@@ -44,19 +44,29 @@ To run the game you need to copy all the .dll files from the following folders a
 * third-party/SDL-mixer/lib/x64/
 * third-party/SDL-mixer/lib/x64/optional/
 * third-party/SDL-ttf/lib/x64/  
-  
-Also, you need to create the data folders for the game. So the final look of the game folder should be:  
-Game folder/  
-├── game.exe  
-├── SDL.dll  
-├── SDL_image.dll  
-├── ...dll  
-├── Graphics/  
-├── Sound/  
-├── ├── Music/  
-├── ├── Tracks/  
-├── Fonts/  
+
+## Build for Linux
+* Clone the repository
+* Install all the SDL libraries
+```
+sudo apt update
+sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev 
+```
+* Build the game  
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+## Run the game on Linux
+If you didn't already installed the SDL dev packages than you need to install the basic packages:  
+```
+sudo apt update
+sudo apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0
+```
 
 ## Run the demo project
-The demo project uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/get/family/974o8).  
-Put the ttf file in the Fonts/ folder of the game folder named as Branda.ttf
+The demo project in this repo uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/).  
+In the folder containing the executable create a new falder named 'Fonts' and inside put the file Branda.ttf.
