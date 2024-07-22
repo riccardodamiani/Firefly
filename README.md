@@ -1,5 +1,17 @@
 # Firefly Engine
-It's a tiny cross-platform game engine based on SDL. 
+Firefly is a tiny cross-platform game engine based on SDL. It provides:
+* a multithreading capable game engine
+* a 2D, tile based graphics engine
+* audio engine with 2D spatial sound
+* a scene template to easily create and load scenes
+* a gui engine with the most common elements: text, editbox, button, panel, slider and droplist
+* a static lighting engine capable of in-game light texture baking 
+* a game object class to easily add objects in the game world
+* a physics engine capable of collision and friction simulation
+  
+This engine was made for my sole entertainment. If your objective is to create a game there are probably better solutions out there. However if you want to try something different, check it out.  
+Note the it's most definitely very buggy in the current moment, especially for Linux.  
+Also note that there is no documentation for the engine yet.  
 
 ## Requirements
 * SDL, SDL image, SDL mixer, SDL ttf
@@ -69,4 +81,4 @@ sudo apt install libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-t
 
 ## Run the demo project
 The demo project in this repo uses a ttf font called Branda that can be downloaded [here](https://www.fontspace.com/).  
-In the folder containing the executable create a new falder named 'Fonts' and inside put the file Branda.ttf.
+In the folder containing the executable create a new folder named 'Fonts' and inside put the file Branda.ttf.
